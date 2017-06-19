@@ -23,7 +23,7 @@ class MAX17201
 {
 public:
 	/* I2C addresses */
-	enum class I2CAdress : char {
+	enum class I2CAddress : char {
 		GaugeDataAndConfigAddress	= 0x6C,
 		NonVolatileMemoryAddress	= 0x16, // WARNING : This memory is limited to 7 writes. Then it is permanently locked.
 		SBSDataAddress				= 0x16
@@ -39,7 +39,7 @@ public:
         ALERT_SC = (1 << 5)   /**< SOC change alert */
     };
 
-    enum class RegisterAdress : char {
+    enum class RegisterAddress : char {
     	/* ModelGauge m5 Registers */
     	Status			= 0x00,
     	VAlrtTh			= 0x01,
@@ -132,15 +132,15 @@ public:
     };
 
 
-	MAX17201(I2C* i2c, int hz = 4000000);
+	MAX17201(I2C* i2c, I2CAddress address = I2CAddress::GaugeDataAndConfigAddress, int hz = 4000000);
 
 private:
 
-	unsigned short i2c_read_register(RegisterAdress);
-	void i2c_set_register(RegisterAdress, unsigned short data);
+	int i2c_read_register(RegisterAddress address, unsigned short* value);
+	int i2c_set_register(RegisterAddress address, unsigned short value);
 
 	I2C* _i2c;
-	static char _addr;
+	I2CAddress _i2cAddress;
 
 };
 
