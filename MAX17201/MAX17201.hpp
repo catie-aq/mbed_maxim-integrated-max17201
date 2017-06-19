@@ -135,6 +135,10 @@ public:
 	MAX17201(I2C* i2c, int hz = 4000000);
 
 private:
+
+	unsigned short i2c_read_register(RegisterAdress);
+	void i2c_set_register(RegisterAdress, unsigned short data);
+
 	I2C* _i2c;
 	static char _addr;
 
