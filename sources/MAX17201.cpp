@@ -17,6 +17,16 @@
 
 # include "MAX17201.hpp"
 
+#define R_SENSE			0.010 //Value of the sense resistor
+
+#define TO_PERCENTAGE	(1./256)
+#define TO_CAPACITY		(0.005/R_SENSE)		// mAh
+#define TO_VOLTAGE		0.078125			// mV
+#define TO_CURRENT		(1.5625/R_SENSE)	// µA
+#define TO_TEMP			(1./256)			// °C
+#define TO_RESISTANCE	(1./4096)			// Ω
+#define TO_SECONDS		5.625
+
 MAX17201::MAX17201(I2C* i2c, I2CAddress address, int hz):
 	_i2cAddress(address)
 {
@@ -24,7 +34,84 @@ MAX17201::MAX17201(I2C* i2c, I2CAddress address, int hz):
 	_i2c->frequency(hz);
 }
 
-int MAX17201::i2c_set_register(RegisterAddress address, unsigned short value)
+float MAX17201::get_state_of_charge()
+{
+	float SOC;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::RepSOC, &value);
+
+	SOC = value*TO_PERCENTAGE;
+	return SOC;
+}
+
+double MAX17201::get_current()
+{
+	double current;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::Current, &value);
+
+	current = value*TO_CURRENT;
+	return current;
+}
+
+double MAX17201::get_average_current()
+{
+	double current;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::AvgCurrent, &value);
+
+	current = value*TO_CURRENT;
+	return current;
+}
+
+double MAX17201::get_VCell()
+{
+	double VCell;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::VCell, &value);
+
+	VCell = value*TO_VOLTAGE;
+	return VCell;
+}
+
+double MAX17201::get_capacity()
+{
+	double cap;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::RepCap, &value);
+
+	cap = value*TO_CAPACITY;
+	return cap;
+}
+
+double MAX17201::get_time_to_empty()
+{
+	double TTE;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::TTE, &value);
+
+	TTE = value*TO_SECONDS;
+	return TTE;
+}
+
+double MAX17201::get_time_to_full()
+{
+	double TTF;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::TTF, &value);
+
+	TTF= value*TO_SECONDS;
+	return TTF;
+}
+
+int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
 {
 	static char data[3];
 	data[0] = static_cast<char>(address);
@@ -37,7 +124,7 @@ int MAX17201::i2c_set_register(RegisterAddress address, unsigned short value)
     return 0;
 }
 
-int MAX17201::i2c_read_register(RegisterAddress address, unsigned short *value)
+int MAX17201::i2c_read_register(RegisterAddress address, uint16_t *value)
 {
     static char data[2];
     data[0] = static_cast<char>(address);
@@ -49,6 +136,6 @@ int MAX17201::i2c_read_register(RegisterAddress address, unsigned short *value)
         return -2;
     }
 
-    *value = (data[1] << 8) | (data[0] & 0xFF);
+    *value = (data[1] << 8) | data[0];
     return 0;
 }

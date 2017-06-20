@@ -134,10 +134,20 @@ public:
 
 	MAX17201(I2C* i2c, I2CAddress address = I2CAddress::GaugeDataAndConfigAddress, int hz = 4000000);
 
+	float get_state_of_charge();
+	double get_current();
+	double get_average_current();
+	double get_VCell();
+	double get_time_to_full();
+	double get_time_to_empty();
+	double get_capacity();
+
+
+
 private:
 
-	int i2c_read_register(RegisterAddress address, unsigned short* value);
-	int i2c_set_register(RegisterAddress address, unsigned short value);
+	int i2c_read_register(RegisterAddress address, uint16_t* value);
+	int i2c_set_register(RegisterAddress address, uint16_t value);
 
 	I2C* _i2c;
 	I2CAddress _i2cAddress;
