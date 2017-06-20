@@ -24,7 +24,7 @@ class MAX17201
 public:
 	/* I2C addresses */
 	enum class I2CAddress : char {
-		GaugeDataAndConfigAddress	= 0x6C,
+		ModelGaugeM5Address			= 0x6C,
 		NonVolatileMemoryAddress	= 0x16, // WARNING : This memory is limited to 7 writes. Then it is permanently locked.
 		SBSDataAddress				= 0x16
 	};
@@ -132,7 +132,7 @@ public:
     };
 
 
-	MAX17201(I2C* i2c, I2CAddress address = I2CAddress::GaugeDataAndConfigAddress, int hz = 4000000);
+	MAX17201(I2C* i2c, int hz = 4000000);
 
 	float get_state_of_charge();
 	double get_current();

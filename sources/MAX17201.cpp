@@ -27,8 +27,8 @@
 #define TO_RESISTANCE	(1./4096)			// Ω
 #define TO_SECONDS		5.625
 
-MAX17201::MAX17201(I2C* i2c, I2CAddress address, int hz):
-	_i2cAddress(address)
+MAX17201::MAX17201(I2C* i2c, int hz):
+	_i2cAddress(I2CAddress::ModelGaugeM5Address)
 {
 	_i2c = i2c;
 	_i2c->frequency(hz);
@@ -38,6 +38,10 @@ float MAX17201::get_state_of_charge()
 {
 	float SOC;
 	uint16_t value;
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
 
 	i2c_read_register(RegisterAddress::RepSOC, &value);
 
@@ -50,6 +54,10 @@ double MAX17201::get_current()
 	double current;
 	uint16_t value;
 
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
 	i2c_read_register(RegisterAddress::Current, &value);
 
 	current = value*TO_CURRENT;
@@ -60,6 +68,10 @@ double MAX17201::get_average_current()
 {
 	double current;
 	uint16_t value;
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
 
 	i2c_read_register(RegisterAddress::AvgCurrent, &value);
 
@@ -72,6 +84,10 @@ double MAX17201::get_VCell()
 	double VCell;
 	uint16_t value;
 
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
 	i2c_read_register(RegisterAddress::VCell, &value);
 
 	VCell = value*TO_VOLTAGE;
@@ -82,6 +98,10 @@ double MAX17201::get_capacity()
 {
 	double cap;
 	uint16_t value;
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
 
 	i2c_read_register(RegisterAddress::RepCap, &value);
 
@@ -94,6 +114,10 @@ double MAX17201::get_full_capacity()
 	double cap;
 	uint16_t value;
 
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
 	i2c_read_register(RegisterAddress::FullCapRep, &value);
 
 	cap = value*TO_CAPACITY;
@@ -105,6 +129,10 @@ double MAX17201::get_time_to_empty()
 	double TTE;
 	uint16_t value;
 
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
 	i2c_read_register(RegisterAddress::TTE, &value);
 
 	TTE = value*TO_SECONDS;
@@ -115,6 +143,10 @@ double MAX17201::get_time_to_full()
 {
 	double TTF;
 	uint16_t value;
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
 
 	i2c_read_register(RegisterAddress::TTF, &value);
 
