@@ -141,6 +141,7 @@ public:
 	double get_time_to_full();
 	double get_time_to_empty();
 	double get_capacity();
+	double get_full_capacity();
 
 
 

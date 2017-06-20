@@ -89,6 +89,17 @@ double MAX17201::get_capacity()
 	return cap;
 }
 
+double MAX17201::get_full_capacity()
+{
+	double cap;
+	uint16_t value;
+
+	i2c_read_register(RegisterAddress::FullCapRep, &value);
+
+	cap = value*TO_CAPACITY;
+	return cap;
+}
+
 double MAX17201::get_time_to_empty()
 {
 	double TTE;
