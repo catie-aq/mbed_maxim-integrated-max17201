@@ -27,8 +27,8 @@
 #define TO_RESISTANCE	(1./4096)			// Ω
 #define TO_SECONDS		5.625
 
-MAX17201::MAX17201(I2C* i2c, int hz):
-	_i2cAddress(I2CAddress::ModelGaugeM5Address)
+MAX17201::MAX17201(I2C* i2c, int hz, PinName interruptPin):
+	_i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
 {
 	_i2c = i2c;
 	_i2c->frequency(hz);
@@ -152,6 +152,11 @@ double MAX17201::get_time_to_full()
 
 	TTF= value*TO_SECONDS;
 	return TTF;
+}
+
+void MAX17201::handle_alert()
+{
+
 }
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
