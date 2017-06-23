@@ -30,13 +30,20 @@ public:
 	};
 
     /* Represents the different alert flags for the MAX17048 */
-    enum class AlertFlags : char { // short ?
-        ALERT_RI = (1 << 0),  /**< Reset indicator */
-        ALERT_VH = (1 << 1),  /**< Voltage high alert */
-        ALERT_VL = (1 << 2),  /**< Voltage low alert */
-        ALERT_VR = (1 << 3),  /**< Voltage reset alert */
-        ALERT_HD = (1 << 4),  /**< SOC low alert */
-        ALERT_SC = (1 << 5)   /**< SOC change alert */
+    enum class StatusFlags : uint16_t { // short ?
+        ALERT_POR 			= (1 << 1),  /**< Power On Reset Indicator */
+        ALERT_CL 			= (1 << 2),  /**< Minimum Current Alert Threshold Exceeded */
+        BATTERY_PRESENT 	= (1 << 3),  /**< Battery presence indicator */
+		ALERT_CH 			= (1 << 6),  /**< Maximum Current Alert Threshold Exceeded */
+        ALERT_dSOCI			= (1 << 7),  /**< 1% SOC change alert */
+        ALERT_VL 			= (1 << 8),  /**< Minimum Voltage Alert Threshold Exceeded */
+        ALERT_TL 			= (1 << 9),  /**< Minimum Temperature Alert Threshold Exceeded */
+        ALERT_SL 			= (1 << 10), /**< Minimum SOC Alert Threshold Exceeded */
+        ALERT_BI 			= (1 << 11), /**< Battery Insertion */
+        ALERT_VH 			= (1 << 12), /**< Maximum Voltage Alert Threshold Exceeded */
+        ALERT_TH 			= (1 << 13), /**< Maximum Temperature Alert Threshold Exceeded */
+        ALERT_SH 			= (1 << 14), /**< Maximum SOC Alert Threshold Exceeded */
+        ALERT_BR 			= (1 << 15)  /**< Battery Removal */
     };
 
     enum class RegisterAddress : char {
@@ -132,18 +139,33 @@ public:
     };
 
 
-	MAX17201(I2C* i2c, int hz = 4000000);
+	MAX17201(I2C* i2c, int hz = 4000000, PinName interruptPin);
 
+	/* Function to get ModelGauge m5 values reported to user */
 	float get_state_of_charge();
 	double get_current();
 	double get_average_current();
+	double get_maximum_current();
+	double get_minimum_current();
 	double get_VCell();
 	double get_time_to_full();
 	double get_time_to_empty();
 	double get_capacity();
 	double get_full_capacity();
+	float get_temperature();
+	float get_average_temperature();
+	int8_t get_max_temperature();
+	int8_t get_min_temperature();
 
 
+	/* ModelGauge m5 configuration function */
+	bool configure(uint8_t number_of_cells = 1, uint16_t bat_capacity = 800, float empty_voltage = 3.1,
+			bool use_external_thermistor = false);
+	void set_empty_voltage(float VEmpty);
+	void set_capacity(uint16_t cap);
+
+	/* Alert related functions */
+	void handle_alert();
 
 private:
 
@@ -152,6 +174,7 @@ private:
 
 	I2C* _i2c;
 	I2CAddress _i2cAddress;
+	InterruptIn _interruptPin;
 
 };
 

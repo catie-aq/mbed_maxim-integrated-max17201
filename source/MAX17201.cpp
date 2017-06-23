@@ -20,12 +20,12 @@
 #define R_SENSE			0.010 //Value of the sense resistor
 
 #define TO_PERCENTAGE	(1./256)
-#define TO_CAPACITY		(0.005/R_SENSE)		// mAh
-#define TO_VOLTAGE		0.078125			// mV
-#define TO_CURRENT		(1.5625/R_SENSE)	// µA
-#define TO_TEMP			(1./256)			// °C
-#define TO_RESISTANCE	(1./4096)			// Ω
-#define TO_SECONDS		5.625
+#define TO_CAPACITY		(0.005/R_SENSE)			// mAh
+#define TO_VOLTAGE		0.078125				// mV
+#define TO_CURRENT		(1.5625/R_SENSE*1000)	// µA
+#define TO_TEMP			(1./256)				// °C
+#define TO_RESISTANCE	(1./4096)				// Ω
+#define TO_SECONDS		5.625					// s
 
 MAX17201::MAX17201(I2C* i2c, int hz, PinName interruptPin):
 	_i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
@@ -79,6 +79,36 @@ double MAX17201::get_average_current()
 	return current;
 }
 
+double MAX17201::get_maximum_current()
+{
+	double current;
+	uint16_t value;
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	i2c_read_register(RegisterAddress::MaxMinCurr, &value);
+
+	current = ((value & 0xFF00) >> 8) *0.40/R_SENSE;
+	return current;
+}
+
+double MAX17201::get_minimum_current()
+{
+	double current;
+	uint16_t value;
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	i2c_read_register(RegisterAddress::MaxMinCurr, &value);
+
+	current = (value & 0xFF) *0.40/R_SENSE;
+	return current;
+}
+
 double MAX17201::get_VCell()
 {
 	double VCell;
@@ -111,8 +141,8 @@ double MAX17201::get_capacity()
 
 double MAX17201::get_full_capacity()
 {
-	double cap;
-	uint16_t value;
+	static double cap;
+	static uint16_t value;
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -126,32 +156,118 @@ double MAX17201::get_full_capacity()
 
 double MAX17201::get_time_to_empty()
 {
-	double TTE;
-	uint16_t value;
-
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
+	uint16_t value;
 	i2c_read_register(RegisterAddress::TTE, &value);
 
-	TTE = value*TO_SECONDS;
-	return TTE;
+	double time_to_empty = value*TO_SECONDS;
+	return time_to_empty;
 }
 
 double MAX17201::get_time_to_full()
 {
-	double TTF;
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
 	uint16_t value;
+	i2c_read_register(RegisterAddress::TTF, &value);
+
+	double time_to_full = value*TO_SECONDS;
+	return time_to_full;
+}
+
+float MAX17201::get_temperature()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::Temp, &value);
+
+	float temperature = value*TO_TEMP;
+	return temperature;
+}
+
+/** Get the average temperature for a configurable period (default is 1.5min)
+ *
+ * @returns
+ *      The average temperature
+ */
+float MAX17201::get_average_temperature()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::AvgTA, &value);
+
+	float avg_temperature = value*TO_TEMP;
+	return avg_temperature;
+}
+
+int8_t MAX17201::get_max_temperature()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::MaxMinTemp, &value);
+
+	int8_t max_temperature = value & 0xFF00 >> 8;
+	return max_temperature;
+}
+
+int8_t MAX17201::get_min_temperature()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::MaxMinTemp, &value);
+
+	int8_t min_temperature = value & 0xFF;
+	return min_temperature;
+}
+
+/** Configure the empty voltage used by ModelGauge m5 algorithm
+ * 					_____________________________________________________________________________________
+ * Register format |_D15_|_D14_|_D13_|_D12_|_D11_|_D10_|_D9_|_D8_|_D7_|_D6_|_D5_|_D4_|_D3_|_D2_|_D1_|_D0_|
+ * 				   |_____________________VEmpty_______________________|___________VRecovery______________|
+ * VEmpty is 10mv per LSB
+ * VRecovery is 40mv per LSB
+ *
+ * @param VEmpty The empty voltage to use in Volts
+ */
+void MAX17201::set_empty_voltage(float VEmpty)
+{
+	uint16_t data;
+	data = (static_cast<uint16_t>(VEmpty*100 & 0x1FF) << 7) | static_cast<uint8_t>((VEmpty+0.5)*25 & 0x7F);
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
-	i2c_read_register(RegisterAddress::TTF, &value);
+	i2c_set_register(RegisterAddress::VEmpty, data);
+}
 
-	TTF= value*TO_SECONDS;
-	return TTF;
+void MAX17201::set_capacity(uint16_t cap)
+{
+	uint16_t data;
+	data = static_cast<uint16_t>(cap/TO_CAPACITY);
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	i2c_set_register(RegisterAddress::DesignCap, data);
 }
 
 void MAX17201::handle_alert()
