@@ -144,19 +144,22 @@ public:
 	MAX17201(I2C* i2c, PinName interruptPin);
 
 	bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800, float empty_voltage = 3.1,
-			bool use_external_thermistor = false);
+			bool use_external_thermistor1 = false, bool use_external_thermistor2 = false);
 
 	/* Function to get ModelGauge m5 values reported to user */
 	float state_of_charge();
 	double current();
 	double average_current();
-	double maximum_current();
-	double minimum_current();
+	float max_current();
+	float min_current();
 	double cell_voltage();
+	double average_cell_voltage();
+	float max_cell_voltage();
+	float min_cell_voltage();
 	float time_to_full();
 	float time_to_empty();
-	double reported_capacity();
-	double full_capacity();
+	float reported_capacity();
+	float full_capacity();
 	float temperature();
 	float average_temperature();
 	int8_t max_temperature();

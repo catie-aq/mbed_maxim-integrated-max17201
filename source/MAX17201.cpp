@@ -22,7 +22,7 @@
 #define TO_PERCENTAGE	(1./256)
 #define TO_CAPACITY		(0.005/R_SENSE)			// mAh
 #define TO_VOLTAGE		0.078125				// mV
-#define TO_CURRENT		(1.5625/R_SENSE*1000)	// µA
+#define TO_CURRENT		(1.5625/R_SENSE*1000)	// mA
 #define TO_TEMP			(1./256)				// °C
 #define TO_RESISTANCE	(1./4096)				// Ω
 #define TO_SECONDS		5.625					// s
@@ -34,7 +34,7 @@ MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
 }
 
 bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, float empty_voltage,
-			bool use_external_thermistor)
+			bool use_external_thermistor1, bool use_external_thermistor2)
 {
 	if (number_of_cells > 15) {
 		printf("Invalid number of cells ! 15 max allowed\n");
@@ -42,25 +42,33 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 	}
 
 	uint8_t temp1;
-	if (use_external_thermistor){
+	if (use_external_thermistor1){
 		temp1 = 1;
 	}
 	else {
 		temp1 = 0;
 	}
 
-	uint16_t config = (1 << 15) | 			// Fuel Gauge Temperature
-					  (0 << 14) | 			// Should always be 0
-					  (0 << 13) | 			// 1 if a thermistor is present on AIN2
-					  (temp1 & 0x1) << 12 |	// Thermistor 1
-					  (1 << 11) |			// Use internal thermistor
-					  (0 << 10) |			// we use default parameter
-					  (0 << 9)  |			// we use default parameter
-					  (0 << 8)  |			// we use default parameter
-					  (0 << 7)  |			// we use default parameter
-					  (0 << 6)  |			// we use default parameter
-					  (0 << 5)  |			// we use default parameter
-					  (0 << 4)  |			// Should always be 0
+	uint8_t temp2;
+	if (use_external_thermistor2){
+		temp2 = 1;
+	}
+	else {
+		temp2 = 0;
+	}
+
+	uint16_t config = (1 << 15) | 				// Fuel Gauge Temperature
+					  (0 << 14) | 				// Should always be 0
+					  ((temp2 & 0x1) << 13) |	// 1 if a thermistor is present on AIN2
+					  ((temp1 & 0x1) << 12) |	// Thermistor 1
+					  (1 << 11) |				// Use internal thermistor
+					  (0 << 10) |				// we use default parameter
+					  (0 << 9)  |				// we use default parameter
+					  (0 << 8)  |				// we use default parameter
+					  (0 << 7)  |				// we use default parameter
+					  (0 << 6)  |				// we use default parameter
+					  (0 << 5)  |				// we use default parameter
+					  (0 << 4)  |				// Should always be 0
 					  (number_of_cells & 0x0F);
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
@@ -120,9 +128,9 @@ double MAX17201::average_current()
 	return current;
 }
 
-double MAX17201::maximum_current()
+float MAX17201::max_current()
 {
-	double current;
+	float current;
 	uint16_t value;
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
@@ -131,13 +139,13 @@ double MAX17201::maximum_current()
 
 	i2c_read_register(RegisterAddress::MaxMinCurr, &value);
 
-	current = ((value & 0xFF00) >> 8) *0.40/R_SENSE;
+	current = ((value & 0xFF00) >> 8) * 0.40/R_SENSE;
 	return current;
 }
 
-double MAX17201::minimum_current()
+float MAX17201::min_current()
 {
-	double current;
+	float current;
 	uint16_t value;
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
@@ -146,52 +154,85 @@ double MAX17201::minimum_current()
 
 	i2c_read_register(RegisterAddress::MaxMinCurr, &value);
 
-	current = (value & 0xFF) *0.40/R_SENSE;
+	current = (value & 0x00FF) * 0.40/R_SENSE;
 	return current;
 }
 
 double MAX17201::cell_voltage()
 {
-	double VCell;
-	uint16_t value;
-
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
+	uint16_t value;
 	i2c_read_register(RegisterAddress::VCell, &value);
 
-	VCell = value*TO_VOLTAGE;
+	double VCell = value*TO_VOLTAGE;
 	return VCell;
 }
 
-double MAX17201::reported_capacity()
+double MAX17201::average_cell_voltage()
 {
-	double cap;
-	uint16_t value;
-
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
+	uint16_t value;
+	i2c_read_register(RegisterAddress::AvgVCell, &value);
+
+	double VCell = value*TO_VOLTAGE;
+	return VCell;
+}
+
+float MAX17201::max_cell_voltage()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::MaxMinVolt, &value);
+
+	float max_voltage = ((value & 0xFF00) >> 8) * 0.20;
+	return max_voltage;
+}
+
+float MAX17201::min_cell_voltage()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::MaxMinVolt, &value);
+
+	float min_voltage = (value & 0x00FF) * 0.20;
+	return min_voltage;
+}
+
+float MAX17201::reported_capacity()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
 	i2c_read_register(RegisterAddress::RepCap, &value);
 
-	cap = value*TO_CAPACITY;
+	float cap = value*TO_CAPACITY;
 	return cap;
 }
 
-double MAX17201::full_capacity()
+float MAX17201::full_capacity()
 {
-	static double cap;
-	static uint16_t value;
-
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
+	uint16_t value;
 	i2c_read_register(RegisterAddress::FullCapRep, &value);
 
-	cap = value*TO_CAPACITY;
+	float cap = value*TO_CAPACITY;
 	return cap;
 }
 
@@ -261,7 +302,7 @@ int8_t MAX17201::max_temperature()
 	uint16_t value;
 	i2c_read_register(RegisterAddress::MaxMinTemp, &value);
 
-	int8_t max_temperature = value & 0xFF00 >> 8;
+	int8_t max_temperature = (value & 0xFF00) >> 8;
 	return max_temperature;
 }
 
@@ -274,7 +315,7 @@ int8_t MAX17201::min_temperature()
 	uint16_t value;
 	i2c_read_register(RegisterAddress::MaxMinTemp, &value);
 
-	int8_t min_temperature = value & 0xFF;
+	int8_t min_temperature = (value & 0x00FF);
 	return min_temperature;
 }
 
@@ -359,7 +400,7 @@ void MAX17201::reset()
 
 void MAX17201::handle_alert()
 {
-
+	//TODO : maybe use this function as a callback when an interrupt occurs on the interrupt pin ?
 }
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
