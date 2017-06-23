@@ -156,6 +156,7 @@ public:
 	float get_average_temperature();
 	int8_t get_max_temperature();
 	int8_t get_min_temperature();
+	float get_age();
 
 
 	/* ModelGauge m5 configuration function */

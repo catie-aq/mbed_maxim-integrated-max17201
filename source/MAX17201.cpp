@@ -237,6 +237,19 @@ int8_t MAX17201::get_min_temperature()
 	return min_temperature;
 }
 
+float MAX17201::get_age()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::TimerH, &value);
+
+	float age = value * 3.4;
+	return age;
+}
+
 /** Configure the empty voltage used by ModelGauge m5 algorithm
  * 					_____________________________________________________________________________________
  * Register format |_D15_|_D14_|_D13_|_D12_|_D11_|_D10_|_D9_|_D8_|_D7_|_D6_|_D5_|_D4_|_D3_|_D2_|_D1_|_D0_|
