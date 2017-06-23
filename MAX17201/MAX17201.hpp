@@ -148,8 +148,8 @@ public:
 	double get_maximum_current();
 	double get_minimum_current();
 	double get_VCell();
-	double get_time_to_full();
-	double get_time_to_empty();
+	float get_time_to_full();
+	float get_time_to_empty();
 	double get_capacity();
 	double get_full_capacity();
 	float get_temperature();

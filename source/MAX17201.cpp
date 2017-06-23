@@ -154,7 +154,7 @@ double MAX17201::get_full_capacity()
 	return cap;
 }
 
-double MAX17201::get_time_to_empty()
+float MAX17201::get_time_to_empty()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -163,11 +163,11 @@ double MAX17201::get_time_to_empty()
 	uint16_t value;
 	i2c_read_register(RegisterAddress::TTE, &value);
 
-	double time_to_empty = value*TO_SECONDS;
+	float time_to_empty = value*TO_SECONDS;
 	return time_to_empty;
 }
 
-double MAX17201::get_time_to_full()
+float MAX17201::get_time_to_full()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -176,7 +176,7 @@ double MAX17201::get_time_to_full()
 	uint16_t value;
 	i2c_read_register(RegisterAddress::TTF, &value);
 
-	double time_to_full = value*TO_SECONDS;
+	float time_to_full = value*TO_SECONDS;
 	return time_to_full;
 }
 
