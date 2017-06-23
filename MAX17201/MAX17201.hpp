@@ -135,40 +135,45 @@ public:
 		AtQResidual		= 0xDC,
 		AtTTE			= 0xDD,
 		AtAvSOC			= 0xDE,
-		AtAvCap			= 0xDF
+		AtAvCap			= 0xDF,
+
+		CmdRegister		= 0x60
     };
 
 
-	MAX17201(I2C* i2c, int hz = 4000000, PinName interruptPin);
+	MAX17201(I2C* i2c, PinName interruptPin);
+
+	bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800, float empty_voltage = 3.1,
+			bool use_external_thermistor = false);
 
 	/* Function to get ModelGauge m5 values reported to user */
-	float get_state_of_charge();
-	double get_current();
-	double get_average_current();
-	double get_maximum_current();
-	double get_minimum_current();
-	double get_VCell();
-	float get_time_to_full();
-	float get_time_to_empty();
-	double get_capacity();
-	double get_full_capacity();
-	float get_temperature();
-	float get_average_temperature();
-	int8_t get_max_temperature();
-	int8_t get_min_temperature();
-	float get_age();
+	float state_of_charge();
+	double current();
+	double average_current();
+	double maximum_current();
+	double minimum_current();
+	double cell_voltage();
+	float time_to_full();
+	float time_to_empty();
+	double reported_capacity();
+	double full_capacity();
+	float temperature();
+	float average_temperature();
+	int8_t max_temperature();
+	int8_t min_temperature();
+	float age();
+	float cycle_count();
 
-
-	/* ModelGauge m5 configuration function */
-	bool configure(uint8_t number_of_cells = 1, uint16_t bat_capacity = 800, float empty_voltage = 3.1,
-			bool use_external_thermistor = false);
-	void set_empty_voltage(float VEmpty);
-	void set_capacity(uint16_t cap);
+	void restart_firmware();
+	void reset();
 
 	/* Alert related functions */
 	void handle_alert();
 
 private:
+
+	void set_empty_voltage(float empty_voltage);
+	void set_design_capacity(uint16_t design_capacity);
 
 	int i2c_read_register(RegisterAddress address, uint16_t* value);
 	int i2c_set_register(RegisterAddress address, uint16_t value);

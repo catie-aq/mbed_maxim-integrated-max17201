@@ -27,14 +27,55 @@
 #define TO_RESISTANCE	(1./4096)				// Ω
 #define TO_SECONDS		5.625					// s
 
-MAX17201::MAX17201(I2C* i2c, int hz, PinName interruptPin):
+MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
 	_i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
 {
 	_i2c = i2c;
-	_i2c->frequency(hz);
 }
 
-float MAX17201::get_state_of_charge()
+bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, float empty_voltage,
+			bool use_external_thermistor)
+{
+	if (number_of_cells > 15) {
+		printf("Invalid number of cells ! 15 max allowed\n");
+		return false;
+	}
+
+	uint8_t temp1;
+	if (use_external_thermistor){
+		temp1 = 1;
+	}
+	else {
+		temp1 = 0;
+	}
+
+	uint16_t config = (1 << 15) | 			// Fuel Gauge Temperature
+					  (0 << 14) | 			// Should always be 0
+					  (0 << 13) | 			// 1 if a thermistor is present on AIN2
+					  (temp1 & 0x1) << 12 |	// Thermistor 1
+					  (1 << 11) |			// Use internal thermistor
+					  (0 << 10) |			// we use default parameter
+					  (0 << 9)  |			// we use default parameter
+					  (0 << 8)  |			// we use default parameter
+					  (0 << 7)  |			// we use default parameter
+					  (0 << 6)  |			// we use default parameter
+					  (0 << 5)  |			// we use default parameter
+					  (0 << 4)  |			// Should always be 0
+					  (number_of_cells & 0x0F);
+
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+	i2c_set_register(RegisterAddress::PackCfg, config);
+
+	set_empty_voltage(empty_voltage);
+	set_design_capacity(design_capacity);
+
+	restart_firmware();
+	return true;
+}
+
+float MAX17201::state_of_charge()
 {
 	float SOC;
 	uint16_t value;
@@ -49,7 +90,7 @@ float MAX17201::get_state_of_charge()
 	return SOC;
 }
 
-double MAX17201::get_current()
+double MAX17201::current()
 {
 	double current;
 	uint16_t value;
@@ -64,7 +105,7 @@ double MAX17201::get_current()
 	return current;
 }
 
-double MAX17201::get_average_current()
+double MAX17201::average_current()
 {
 	double current;
 	uint16_t value;
@@ -79,7 +120,7 @@ double MAX17201::get_average_current()
 	return current;
 }
 
-double MAX17201::get_maximum_current()
+double MAX17201::maximum_current()
 {
 	double current;
 	uint16_t value;
@@ -94,7 +135,7 @@ double MAX17201::get_maximum_current()
 	return current;
 }
 
-double MAX17201::get_minimum_current()
+double MAX17201::minimum_current()
 {
 	double current;
 	uint16_t value;
@@ -109,7 +150,7 @@ double MAX17201::get_minimum_current()
 	return current;
 }
 
-double MAX17201::get_VCell()
+double MAX17201::cell_voltage()
 {
 	double VCell;
 	uint16_t value;
@@ -124,7 +165,7 @@ double MAX17201::get_VCell()
 	return VCell;
 }
 
-double MAX17201::get_capacity()
+double MAX17201::reported_capacity()
 {
 	double cap;
 	uint16_t value;
@@ -139,7 +180,7 @@ double MAX17201::get_capacity()
 	return cap;
 }
 
-double MAX17201::get_full_capacity()
+double MAX17201::full_capacity()
 {
 	static double cap;
 	static uint16_t value;
@@ -154,7 +195,7 @@ double MAX17201::get_full_capacity()
 	return cap;
 }
 
-float MAX17201::get_time_to_empty()
+float MAX17201::time_to_empty()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -167,7 +208,7 @@ float MAX17201::get_time_to_empty()
 	return time_to_empty;
 }
 
-float MAX17201::get_time_to_full()
+float MAX17201::time_to_full()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -180,7 +221,7 @@ float MAX17201::get_time_to_full()
 	return time_to_full;
 }
 
-float MAX17201::get_temperature()
+float MAX17201::temperature()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -198,7 +239,7 @@ float MAX17201::get_temperature()
  * @returns
  *      The average temperature
  */
-float MAX17201::get_average_temperature()
+float MAX17201::average_temperature()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -211,7 +252,7 @@ float MAX17201::get_average_temperature()
 	return avg_temperature;
 }
 
-int8_t MAX17201::get_max_temperature()
+int8_t MAX17201::max_temperature()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -224,7 +265,7 @@ int8_t MAX17201::get_max_temperature()
 	return max_temperature;
 }
 
-int8_t MAX17201::get_min_temperature()
+int8_t MAX17201::min_temperature()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -237,7 +278,7 @@ int8_t MAX17201::get_min_temperature()
 	return min_temperature;
 }
 
-float MAX17201::get_age()
+float MAX17201::age()
 {
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -248,6 +289,19 @@ float MAX17201::get_age()
 
 	float age = value * 3.4;
 	return age;
+}
+
+float MAX17201::cycle_count()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t value;
+	i2c_read_register(RegisterAddress::Cycles, &value);
+
+	float cycles = value * (16/100);
+	return cycles;
 }
 
 /** Configure the empty voltage used by ModelGauge m5 algorithm
@@ -262,7 +316,7 @@ float MAX17201::get_age()
 void MAX17201::set_empty_voltage(float VEmpty)
 {
 	uint16_t data;
-	data = (static_cast<uint16_t>(VEmpty*100 & 0x1FF) << 7) | static_cast<uint8_t>((VEmpty+0.5)*25 & 0x7F);
+	data = ((static_cast<uint16_t>(VEmpty*100) & 0x1FF) << 7) | (static_cast<uint8_t>((VEmpty+0.5)*25) & 0x7F);
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -271,16 +325,36 @@ void MAX17201::set_empty_voltage(float VEmpty)
 	i2c_set_register(RegisterAddress::VEmpty, data);
 }
 
-void MAX17201::set_capacity(uint16_t cap)
+void MAX17201::set_design_capacity(uint16_t design_capacity)
 {
 	uint16_t data;
-	data = static_cast<uint16_t>(cap/TO_CAPACITY);
+	data = static_cast<uint16_t>(design_capacity/TO_CAPACITY);
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
 	i2c_set_register(RegisterAddress::DesignCap, data);
+}
+
+void MAX17201::restart_firmware()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	i2c_set_register(RegisterAddress::Config2, 0x0001);
+	wait_ms(10);
+}
+
+void MAX17201::reset()
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	i2c_set_register(RegisterAddress::CmdRegister, 0x000F); // Hardware power on reset
+	wait_ms(10);
 }
 
 void MAX17201::handle_alert()
