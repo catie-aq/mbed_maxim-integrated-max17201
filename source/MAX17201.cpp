@@ -39,6 +39,11 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 		return false;
 	}
 
+	//check gauge presency:
+	if (_i2c->write(static_cast<int>(_i2cAddress) << 1, NULL, 0) != 0){
+		return false;
+	}
+
 	uint8_t temp1;
 	if (use_external_thermistor1){
 		temp1 = 1;
