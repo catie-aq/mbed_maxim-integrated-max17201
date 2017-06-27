@@ -17,12 +17,10 @@
 
 # include "MAX17201.hpp"
 
-#define R_SENSE			0.010 //Value of the sense resistor
-
 #define TO_PERCENTAGE	(1./256)
 #define TO_CAPACITY		(0.005/R_SENSE)			// mAh
 #define TO_VOLTAGE		0.078125				// mV
-#define TO_CURRENT		(1.5625/R_SENSE*1000)	// mA
+#define TO_CURRENT		(1.5625/(R_SENSE*1000))	// mA
 #define TO_TEMP			(1./256)				// °C
 #define TO_RESISTANCE	(1./4096)				// Ω
 #define TO_SECONDS		5.625					// s
@@ -101,7 +99,7 @@ float MAX17201::state_of_charge()
 double MAX17201::current()
 {
 	double current;
-	uint16_t value;
+	int16_t value;
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -116,7 +114,7 @@ double MAX17201::current()
 double MAX17201::average_current()
 {
 	double current;
-	uint16_t value;
+	int16_t value;
 
 	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
@@ -268,7 +266,7 @@ float MAX17201::temperature()
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
-	uint16_t value;
+	int16_t value;
 	i2c_read_register(RegisterAddress::Temp, &value);
 
 	float temperature = value*TO_TEMP;
@@ -286,7 +284,7 @@ float MAX17201::average_temperature()
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
-	uint16_t value;
+	int16_t value;
 	i2c_read_register(RegisterAddress::AvgTA, &value);
 
 	float avg_temperature = value*TO_TEMP;
@@ -384,7 +382,8 @@ void MAX17201::restart_firmware()
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
-	i2c_set_register(RegisterAddress::Config2, 0x0001);
+	uint16_t restart_cmd = 0x0001;
+	i2c_set_register(RegisterAddress::Config2, restart_cmd);
 	wait_ms(10);
 }
 
@@ -394,7 +393,8 @@ void MAX17201::reset()
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 
-	i2c_set_register(RegisterAddress::CmdRegister, 0x000F); // Hardware power on reset
+	uint16_t reset_cmd = 0x00F;
+	i2c_set_register(RegisterAddress::CmdRegister, reset_cmd); // Hardware power on reset
 	wait_ms(10);
 }
 
@@ -416,7 +416,36 @@ int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
     return 0;
 }
 
+int MAX17201::i2c_set_register(RegisterAddress address, int16_t value)
+{
+	static char data[3];
+	data[0] = static_cast<char>(address);
+	data[1] = value & 0xFF;
+	data[2] = (value & 0xFF00) >> 8;
+
+    if (_i2c->write(static_cast<int>(_i2cAddress) << 1, data, 3, false) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
 int MAX17201::i2c_read_register(RegisterAddress address, uint16_t *value)
+{
+    static char data[2];
+    data[0] = static_cast<char>(address);
+
+    if (_i2c->write(static_cast<int>(_i2cAddress) << 1, data, 1, true) != 0) {
+        return -1;
+    }
+    if (_i2c->read(static_cast<int>(_i2cAddress) << 1, data , 2, false) != 0) {
+        return -2;
+    }
+
+    *value = (data[1] << 8) | data[0];
+    return 0;
+}
+
+int MAX17201::i2c_read_register(RegisterAddress address, int16_t *value)
 {
     static char data[2];
     data[0] = static_cast<char>(address);

@@ -19,12 +19,14 @@
 
 #include "mbed.h"
 
+#define R_SENSE			0.020 //Value of the sense resistor
+
 class MAX17201
 {
 public:
 	/* I2C addresses */
 	enum class I2CAddress : char {
-		ModelGaugeM5Address			= 0x6C,
+		ModelGaugeM5Address			= 0x36,
 		NonVolatileMemoryAddress	= 0x16, // WARNING : This memory is limited to 7 writes. Then it is permanently locked.
 		SBSDataAddress				= 0x16
 	};
@@ -179,7 +181,10 @@ private:
 	void set_design_capacity(uint16_t design_capacity);
 
 	int i2c_read_register(RegisterAddress address, uint16_t* value);
+	int i2c_read_register(RegisterAddress address, int16_t* value);
 	int i2c_set_register(RegisterAddress address, uint16_t value);
+	int i2c_set_register(RegisterAddress address, int16_t value);
+
 
 	I2C* _i2c;
 	I2CAddress _i2cAddress;
