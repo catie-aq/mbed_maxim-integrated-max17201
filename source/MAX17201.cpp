@@ -348,6 +348,58 @@ float MAX17201::cycle_count()
 	return cycles;
 }
 
+void MAX17201::set_current_alerts(float max_current_threshold, float min_current_threshold)
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	int8_t max_thr = (max_current_threshold*1000*R_SENSE)/400;
+	int8_t min_thr = (min_current_threshold*1000*R_SENSE)/400;
+
+	uint16_t data = ((max_thr & 0xFF) << 8) | (min_thr & 0xFF); // set threshold
+	i2c_set_register(RegisterAddress::IAlrtTh, data);
+}
+
+void MAX17201::set_voltage_alerts(float max_voltage_threshold, float min_voltage_threshold)
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint8_t max_thr = (max_voltage_threshold*1000)/20;
+	uint8_t min_thr = (min_voltage_threshold*1000)/20;
+
+	uint16_t data = ((max_thr & 0xFF) << 8) | (min_thr & 0xFF); // set threshold
+	i2c_set_register(RegisterAddress::VAlrtTh, data);
+}
+
+void MAX17201::set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold)
+{
+	if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+		_i2cAddress = I2CAddress::ModelGaugeM5Address;
+	}
+
+	uint16_t data = (max_soc_threshold << 8) | min_soc_threshold; // set threshold
+	i2c_set_register(RegisterAddress::SAlrtTh, data);
+}
+
+void MAX17201::enable_alerts()
+{
+	uint16_t config;
+	i2c_read_register(RegisterAddress::Config, &config); // Read config
+	config |= (1 << 2); // Enable alerts
+	i2c_set_register(RegisterAddress::Config, config); // Read back config
+}
+
+void MAX17201::disable_alerts()
+{
+	uint16_t config;
+	i2c_read_register(RegisterAddress::Config, &config); // Read config
+	config |= (0 << 2); // Enable alerts
+	i2c_set_register(RegisterAddress::Config, config); // Read back config
+}
+
 /** Configure the empty voltage used by ModelGauge m5 algorithm
  * 					_____________________________________________________________________________________
  * Register format |_D15_|_D14_|_D13_|_D12_|_D11_|_D10_|_D9_|_D8_|_D7_|_D6_|_D5_|_D4_|_D3_|_D2_|_D1_|_D0_|

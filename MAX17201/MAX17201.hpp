@@ -169,6 +169,13 @@ public:
 	float age();
 	float cycle_count();
 
+	void set_current_alerts(float max_current_threshold, float min_current_threshold);
+	void set_voltage_alerts(float max_voltage_threshold, float min_voltage_threshold);
+	void set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold);
+	void enable_alerts();
+	void disable_alerts();
+
+
 	void restart_firmware();
 	void reset();
 
