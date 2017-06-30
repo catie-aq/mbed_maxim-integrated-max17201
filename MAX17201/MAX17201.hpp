@@ -174,6 +174,7 @@ public:
 	void set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold);
 	void enable_alerts();
 	void disable_alerts();
+	void configure_thermistor(uint16_t gain, uint16_t offset);
 
 
 	void restart_firmware();

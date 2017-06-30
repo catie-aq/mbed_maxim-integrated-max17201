@@ -44,26 +44,20 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 		return false;
 	}
 
-	uint8_t temp1;
+	uint8_t temp1 = 0;
 	if (use_external_thermistor1){
 		temp1 = 1;
 	}
-	else {
-		temp1 = 0;
-	}
 
-	uint8_t temp2;
+	uint8_t temp2 = 0;
 	if (use_external_thermistor2){
 		temp2 = 1;
-	}
-	else {
-		temp2 = 0;
 	}
 
 	uint16_t config = (1 << 15) | 				// Fuel Gauge Temperature
 					  (0 << 14) | 				// Should always be 0
 					  ((temp2 & 0x1) << 13) |	// 1 if a thermistor is present on AIN2
-					  ((temp1 & 0x1) << 12) |	// Thermistor 1
+					  ((temp1 & 0x1) << 12) |	// 1 if a thermistor is present on AIN1
 					  (1 << 11) |				// Use internal thermistor
 					  (0 << 10) |				// we use default parameter
 					  (0 << 9)  |				// we use default parameter
@@ -78,6 +72,11 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 		_i2cAddress = I2CAddress::ModelGaugeM5Address;
 	}
 	i2c_set_register(RegisterAddress::PackCfg, config);
+
+	/* Configure thermistor as Murata by default: */
+	if (temp1 || temp2){
+		configure_thermistor(0xEE56, 0x1DA4);
+	}
 
 	set_empty_voltage(empty_voltage);
 	set_design_capacity(design_capacity);
@@ -398,6 +397,12 @@ void MAX17201::disable_alerts()
 	i2c_read_register(RegisterAddress::Config, &config); // Read config
 	config |= (0 << 2); // Enable alerts
 	i2c_set_register(RegisterAddress::Config, config); // Read back config
+}
+
+void MAX17201::configure_thermistor(uint16_t gain, uint16_t offset)
+{
+	i2c_set_register(RegisterAddress::TGain, gain);
+	i2c_set_register(RegisterAddress::Toff, offset);
 }
 
 /** Configure the empty voltage used by ModelGauge m5 algorithm
