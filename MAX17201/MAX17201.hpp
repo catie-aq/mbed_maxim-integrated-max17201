@@ -144,6 +144,8 @@ public:
 
 
     MAX17201(I2C* i2c, PinName interruptPin);
+    MAX17201(I2C* i2c);
+
 
     bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800, float empty_voltage = 3.1,
             bool use_external_thermistor1 = false, bool use_external_thermistor2 = false);

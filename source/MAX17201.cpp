@@ -31,6 +31,12 @@ MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
     _i2c = i2c;
 }
 
+MAX17201::MAX17201(I2C* i2c):
+    _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(DIO1)
+{
+    _i2c = i2c;
+}
+
 bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, float empty_voltage,
             bool use_external_thermistor1, bool use_external_thermistor2)
 {
