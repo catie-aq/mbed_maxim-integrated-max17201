@@ -26,7 +26,7 @@ class MAX17201
 public:
     /* I2C addresses */
     enum class I2CAddress : char {
-        ModelGaugeM5Address            = 0x36,
+        ModelGaugeM5Address            = 0x6C,
         NonVolatileMemoryAddress       = 0x16, // WARNING : This memory is limited to 7 writes. Then it is permanently locked.
         SBSDataAddress                 = 0x16
     };
@@ -181,6 +181,9 @@ public:
 
     void restart_firmware();
     void reset();
+
+    /* Non-Volatile memory */
+    uint8_t remaining_writes();
 
     /* Alert related functions */
     void handle_alert();

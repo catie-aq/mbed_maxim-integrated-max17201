@@ -46,7 +46,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
     }
 
     //check gauge presency:
-    if (_i2c->write(static_cast<int>(_i2cAddress) << 1, NULL, 0) != 0){
+    if (_i2c->write(static_cast<int>(_i2cAddress), NULL, 0) != 0){
         return false;
     }
 
@@ -466,6 +466,38 @@ void MAX17201::reset()
     wait_ms(10);
 }
 
+/** Get the number of remaining updates of the Nonvolatile memory
+ *
+ * @returns
+ *      The number of remaining updates
+ */
+uint8_t MAX17201::remaining_writes()
+{
+    uint16_t command = 0xE2FA; // Ask for remainings update
+    i2c_set_register(RegisterAddress::CmdRegister, command);
+    wait_ms(5); // tRECALL
+
+    _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    uint16_t data = 0;
+    i2c_read_register((RegisterAddress) 0xED, &data);
+    _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    /* Compute the remainings updates
+     * see the datasheet for more informations about the steps to be done
+     */
+    uint8_t remaining_writes = (data & 0xFF00 >> 8) | (data & 0xFF);
+    int i = 0;
+    int mask = 0x01;
+    for (i = 0; i < 7; i++) {
+        if (mask ^ remaining_writes == 0) {
+            break;
+        }
+        else {
+            mask = (mask << 1) + 1;
+        }
+    }
+    return (7 - i);
+}
+
 void MAX17201::handle_alert()
 {
     //TODO : maybe use this function as a callback when an interrupt occurs on the interrupt pin ?
@@ -478,7 +510,7 @@ int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
     data[1] = value & 0xFF;
     data[2] = (value & 0xFF00) >> 8;
 
-    if (_i2c->write(static_cast<int>(_i2cAddress) << 1, data, 3, false) != 0) {
+    if (_i2c->write(static_cast<int>(_i2cAddress), data, 3, false) != 0) {
         return -1;
     }
     return 0;
@@ -491,7 +523,7 @@ int MAX17201::i2c_set_register(RegisterAddress address, int16_t value)
     data[1] = value & 0xFF;
     data[2] = (value & 0xFF00) >> 8;
 
-    if (_i2c->write(static_cast<int>(_i2cAddress) << 1, data, 3, false) != 0) {
+    if (_i2c->write(static_cast<int>(_i2cAddress), data, 3, false) != 0) {
         return -1;
     }
     return 0;
@@ -502,10 +534,10 @@ int MAX17201::i2c_read_register(RegisterAddress address, uint16_t *value)
     static char data[2];
     data[0] = static_cast<char>(address);
 
-    if (_i2c->write(static_cast<int>(_i2cAddress) << 1, data, 1, true) != 0) {
+    if (_i2c->write(static_cast<int>(_i2cAddress), data, 1, true) != 0) {
         return -1;
     }
-    if (_i2c->read(static_cast<int>(_i2cAddress) << 1, data , 2, false) != 0) {
+    if (_i2c->read(static_cast<int>(_i2cAddress), data , 2, false) != 0) {
         return -2;
     }
 
@@ -518,10 +550,10 @@ int MAX17201::i2c_read_register(RegisterAddress address, int16_t *value)
     static char data[2];
     data[0] = static_cast<char>(address);
 
-    if (_i2c->write(static_cast<int>(_i2cAddress) << 1, data, 1, true) != 0) {
+    if (_i2c->write(static_cast<int>(_i2cAddress), data, 1, true) != 0) {
         return -1;
     }
-    if (_i2c->read(static_cast<int>(_i2cAddress) << 1, data , 2, false) != 0) {
+    if (_i2c->read(static_cast<int>(_i2cAddress), data , 2, false) != 0) {
         return -2;
     }
 
