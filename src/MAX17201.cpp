@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-# include "MAX17201.hpp"
+# include "max17201.h"
+
+namespace sixtron {
+
+namespace {
 
 #define TO_PERCENTAGE     (1./256)
 #define TO_CAPACITY       (0.005/R_SENSE)          // mAh
@@ -24,6 +28,8 @@
 #define TO_TEMP           (1./256)                 // °C
 #define TO_RESISTANCE     (1./4096)                // Ω
 #define TO_SECONDS        5.625                    // s
+
+}
 
 MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
     _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
@@ -562,3 +568,5 @@ int MAX17201::i2c_read_register(RegisterAddress address, int16_t *value)
     *value = (data[1] << 8) | data[0];
     return 0;
 }
+
+} // namepsace sixtron

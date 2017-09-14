@@ -19,6 +19,8 @@
 
 #include "mbed.h"
 
+namespace sixtron {
+
 #define R_SENSE            0.020 //Value of the sense resistor
 
 class MAX17201
@@ -204,5 +206,7 @@ private:
     InterruptIn _interruptPin;
 
 };
+
+} // namespace sixtron
 
 #endif // MAX17201_H
