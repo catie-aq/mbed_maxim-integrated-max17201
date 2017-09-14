@@ -102,7 +102,9 @@ float MAX17201::state_of_charge()
 
     i2c_read_register(RegisterAddress::RepSOC, &value);
 
-    SOC = value*TO_PERCENTAGE;
+    SOC = value * TO_PERCENTAGE;
+    SOC = SOC > 100 ? 100 : SOC;
+    SOC = SOC < 0 ? 0 : SOC;
     return SOC;
 }
 
