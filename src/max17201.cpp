@@ -56,28 +56,38 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
         return false;
     }
 
+    restart_firmware();
+
     uint8_t temp1 = 0;
+    uint8_t fgt = 0;
     if (use_external_thermistor1){
         temp1 = 1;
+        fgt = 1;
     }
 
     uint8_t temp2 = 0;
     if (use_external_thermistor2){
         temp2 = 1;
+        fgt = 0;
     }
 
-    uint16_t config = (1 << 15) |                 // Fuel Gauge Temperature
-                      (0 << 14) |                 // Should always be 0
-                      ((temp2 & 0x1) << 13) |    // 1 if a thermistor is present on AIN2
-                      ((temp1 & 0x1) << 12) |    // 1 if a thermistor is present on AIN1
-                      (1 << 11) |                // Use internal thermistor
-                      (0 << 10) |                // we use default parameter
-                      (0 << 9)  |                // we use default parameter
-                      (0 << 8)  |                // we use default parameter
-                      (0 << 7)  |                // we use default parameter
-                      (0 << 6)  |                // we use default parameter
-                      (0 << 5)  |                // we use default parameter
-                      (0 << 4)  |                // Should always be 0
+    uint8_t internal_temp = 0;
+    if (!use_external_thermistor1 && !use_external_thermistor2) {
+        internal_temp = 1;
+    }
+
+    uint16_t config = (fgt << 15)           |    // Temperature source selection
+                      (0 << 14)             |    // Should always be 0
+                      (temp2 << 13)         |    // 1 if a thermistor is present on AIN2
+                      (temp1 << 12)         |    // 1 if a thermistor is present on AIN1
+                      (internal_temp << 11) |    // Use internal thermistor
+                      (0 << 10)             |    // we use default parameter
+                      (0 << 9)              |    // we use default parameter
+                      (0 << 8)              |    // we use default parameter
+                      (0 << 7)              |    // we use default parameter
+                      (0 << 6)              |    // we use default parameter
+                      (0 << 5)              |    // we use default parameter
+                      (0 << 4)              |    // Should always be 0
                       (number_of_cells & 0x0F);
 
     if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
@@ -93,7 +103,8 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
     set_empty_voltage(empty_voltage);
     set_design_capacity(design_capacity);
 
-    restart_firmware();
+    wait_ms(100); // let time to software to compute new values
+
     return true;
 }
 
@@ -420,9 +431,9 @@ void MAX17201::configure_thermistor(uint16_t gain, uint16_t offset)
 }
 
 /** Configure the empty voltage used by ModelGauge m5 algorithm
- *                     _____________________________________________________________________________________
+ *                  _____________________________________________________________________________________
  * Register format |_D15_|_D14_|_D13_|_D12_|_D11_|_D10_|_D9_|_D8_|_D7_|_D6_|_D5_|_D4_|_D3_|_D2_|_D1_|_D0_|
- *                    |_____________________VEmpty_______________________|___________VRecovery______________|
+ *                 |_____________________VEmpty_______________________|___________VRecovery______________|
  * VEmpty is 10mv per LSB
  * VRecovery is 40mv per LSB
  *
@@ -450,6 +461,11 @@ void MAX17201::set_design_capacity(uint16_t design_capacity)
     }
 
     i2c_set_register(RegisterAddress::DesignCap, data);
+    i2c_set_register(RegisterAddress::FullCap, data);
+    i2c_set_register(RegisterAddress::FullCapRep, data);
+
+    data = static_cast<uint16_t>((design_capacity*1.1)/TO_CAPACITY);
+    i2c_set_register(RegisterAddress::FullCapNom, data);
 }
 
 void MAX17201::restart_firmware()
@@ -460,7 +476,7 @@ void MAX17201::restart_firmware()
 
     uint16_t restart_cmd = 0x0001;
     i2c_set_register(RegisterAddress::Config2, restart_cmd);
-    wait_ms(10);
+    wait_ms(500);
 }
 
 void MAX17201::reset()
