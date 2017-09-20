@@ -302,11 +302,6 @@ float MAX17201::temperature()
     return temperature;
 }
 
-/** Get the average temperature for a configurable period (default is 1.5min)
- *
- * @returns
- *      The average temperature
- */
 float MAX17201::average_temperature()
 {
     if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
@@ -420,7 +415,7 @@ void MAX17201::disable_alerts()
 {
     uint16_t config;
     i2c_read_register(RegisterAddress::Config, &config); // Read config
-    config |= (0 << 2); // Enable alerts
+    config |= (0 << 2); // Disable alerts
     i2c_set_register(RegisterAddress::Config, config); // Read back config
 }
 
@@ -430,15 +425,6 @@ void MAX17201::configure_thermistor(uint16_t gain, uint16_t offset)
     i2c_set_register(RegisterAddress::Toff, offset);
 }
 
-/** Configure the empty voltage used by ModelGauge m5 algorithm
- *                  _____________________________________________________________________________________
- * Register format |_D15_|_D14_|_D13_|_D12_|_D11_|_D10_|_D9_|_D8_|_D7_|_D6_|_D5_|_D4_|_D3_|_D2_|_D1_|_D0_|
- *                 |_____________________VEmpty_______________________|___________VRecovery______________|
- * VEmpty is 10mv per LSB
- * VRecovery is 40mv per LSB
- *
- * @param VEmpty The empty voltage to use in Volts
- */
 void MAX17201::set_empty_voltage(float VEmpty)
 {
     uint16_t data;
@@ -490,11 +476,6 @@ void MAX17201::reset()
     wait_ms(10);
 }
 
-/** Get the number of remaining updates of the Nonvolatile memory
- *
- * @returns
- *      The number of remaining updates
- */
 uint8_t MAX17201::remaining_writes()
 {
     uint16_t command = 0xE2FA; // Ask for remainings update

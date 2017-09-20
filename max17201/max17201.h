@@ -148,51 +148,226 @@ public:
     MAX17201(I2C* i2c, PinName interruptPin);
     MAX17201(I2C* i2c);
 
-
+    /*!
+     *  Configure the gauge
+     *
+     *  @param number_of_cells : default value is 1
+     *  @param design_capacity : capacity (mAh), default is 800mAh
+     *  @param empty_voltage : voltage (V) bellow which battery is considered empty, default is 3.1V
+     *  @param use_external_thermistor1 : default is false
+     *  @param use_external_thermistor2 : default is false (in case both are false, will use internal thermistor)
+     *  @return true on success, false on failure
+     */
     bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800, float empty_voltage = 3.1,
             bool use_external_thermistor1 = false, bool use_external_thermistor2 = false);
 
-    /* Function to get ModelGauge m5 values reported to user */
+    /*!
+     *  Get battery state of charge (%)
+     *
+     *  @return Percentage of battery remaining
+     */
     float state_of_charge();
+
+    /*!
+     *  Get delivered current
+     *
+     *  @return current (mA)
+     */
     double current();
+
+    /*!
+     *  Get average current
+     *
+     *  @return average current (mA)
+     */
     double average_current();
+
+    /*!
+     *  Get maximum current
+     *
+     *  @return maximum current (mA)
+     *
+     */
     float max_current();
+
+    /*!
+     *  Get minimum current
+     *
+     *  @return minimum current (mA)
+     */
     float min_current();
+
+    /*
+     *  Get cell voltage (TODO : what cell ?)
+     *
+     *  @return cell voltage
+     */
     double cell_voltage();
+
+    /*!
+     *  Get average cell voltage (TODO : over time ?)
+     *
+     *  @return average cell voltage
+     */
     double average_cell_voltage();
+
+    /*!
+     *  Get maximum cell voltage (TODO : over time ?)
+     *
+     *  @return maximum cell voltage
+     */
     float max_cell_voltage();
+
+    /*!
+     *  Get minimum cell voltage (TODO : over time ?)
+     *
+     *  @return minimum cell voltage
+     */
     float min_cell_voltage();
+
+    /*!
+     *  Remaining time until battery is full
+     *
+     *  @return time to full (seconds)
+     */
     float time_to_full();
+
+    /*!
+     *  Get remaining time until battery is empty
+     *
+     *  @return time to empty (seconds)
+     */
     float time_to_empty();
+
+    /*!
+     *  TODO
+     */
     float reported_capacity();
+
+    /*!
+     *  TODO
+     */
     float full_capacity();
+
+    /*!
+     *  Get temperature
+     *  @return Gauge temperature (TODO Gauge, battery ? internal, external ?)
+     */
     float temperature();
+
+    /*!
+     *  Get the average temperature for a configurable period (default is 1.5min)
+     *
+     *  @return The average temperature
+     */
     float average_temperature();
+
+    /*!
+     *  Get the maximum temperature
+     *
+     *  @return Maximum temperature
+     */
     int8_t max_temperature();
+
+    /*!
+     *  Get the minimum temperature
+     *
+     *  @return minimum temperature
+     */
     int8_t min_temperature();
+
+    /*!
+     *  TODO
+     */
     float age();
+
+    /*!
+     *  Number of charge cycle completed (TODO ?)
+     *
+     *  @return number of cycle
+     */
     float cycle_count();
 
+    /*!
+     *  Set alerts on minimum and maximum current
+     *
+     *  @param max_current_threshold (mA)
+     *  @param min_current_threshold (mA)
+     */
     void set_current_alerts(float max_current_threshold, float min_current_threshold);
+
+    /*!
+     *  Set alerts on minimum and maximum voltage
+     *
+     *  @param max_voltage_threshold (V)
+     *  @param min_voltage_threshold (V)
+     */
     void set_voltage_alerts(float max_voltage_threshold, float min_voltage_threshold);
+
+    /*!
+     *  Set alerts on minimum and maximum battery percentage
+     *
+     *  @param max_soc_threshold (%(TODO ?))
+     *  @param min_soc_threshold (%(TODO ?))
+     */
     void set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold);
+
+    /*!
+     *  Enable alerts on voltage, current and state of charge
+     */
     void enable_alerts();
+
+    /*!
+     *  Disable alerts on voltage, current and state of charge
+     */
     void disable_alerts();
+
+    /*!
+     *  TODO
+     */
     void configure_thermistor(uint16_t gain, uint16_t offset);
 
-
+    /*!
+     *  TODO
+     */
     void restart_firmware();
+
+    /*!
+     *  TODO
+     */
     void reset();
 
-    /* Non-Volatile memory */
+    /*!
+     *  Get the number of remaining updates of the Nonvolatile memory
+     *
+     *  @returns The number of remaining updates
+     */
     uint8_t remaining_writes();
 
-    /* Alert related functions */
+    /*!
+     *  Alert related functions
+     */
     void handle_alert();
 
 private:
 
+    /*!
+     *  Configure the empty voltage used by ModelGauge m5 algorithm
+     *                   _____________________________________________________________________________________
+     *  Register format |_D15_|_D14_|_D13_|_D12_|_D11_|_D10_|_D9_|_D8_|_D7_|_D6_|_D5_|_D4_|_D3_|_D2_|_D1_|_D0_|
+     *                  |_____________________VEmpty_______________________|___________VRecovery______________|
+     *  VEmpty is 10mv per LSB
+     *  VRecovery is 40mv per LSB
+     *
+     *  @param VEmpty The empty voltage to use in Volts
+     */
     void set_empty_voltage(float empty_voltage);
+
+    /*!
+     *  Set battery capacity
+     *
+     *  @param battery capacity (mAh)
+     */
     void set_design_capacity(uint16_t design_capacity);
 
     int i2c_read_register(RegisterAddress address, uint16_t* value);
