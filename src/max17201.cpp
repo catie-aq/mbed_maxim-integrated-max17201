@@ -355,7 +355,7 @@ float MAX17201::age()
     uint16_t value;
     i2c_read_register(RegisterAddress::TimerH, &value);
 
-    float age = value * 3.4;
+    float age = value * 3.2;
     return age;
 }
 
