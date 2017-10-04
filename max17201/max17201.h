@@ -180,14 +180,14 @@ public:
     double current();
 
     /**
-     *  Get average current
+     *  Get average current for the last 5.625 s
      *
      *  @return average current (mA)
      */
     double average_current();
 
     /**
-     *  Get maximum current
+     *  Get maximum current since device reset
      *
      *  @return maximum current (mA)
      *
@@ -195,35 +195,36 @@ public:
     float max_current();
 
     /**
-     *  Get minimum current
+     *  Get minimum current since device reset
      *
      *  @return minimum current (mA)
      */
     float min_current();
 
     /**
-     *  Get cell voltage (TODO : what cell ?)
+     *  Get cell voltage
+     * If more than one cell are used this is the lowest voltage of all cells
      *
      *  @return cell voltage
      */
     double cell_voltage();
 
     /**
-     *  Get average cell voltage (TODO : over time ?)
+     *  Get average cell voltage for the last 45 s
      *
      *  @return average cell voltage
      */
     double average_cell_voltage();
 
     /**
-     *  Get maximum cell voltage (TODO : over time ?)
+     *  Get maximum cell voltage since device reset
      *
      *  @return maximum cell voltage
      */
     float max_cell_voltage();
 
     /**
-     *  Get minimum cell voltage (TODO : over time ?)
+     *  Get minimum cell voltage since device reset
      *
      *  @return minimum cell voltage
      */
@@ -244,18 +245,27 @@ public:
     float time_to_empty();
 
     /**
-     *  TODO
+     *  Get the remaining capacity of the battery
+     * 
+     * @returns remaining capacicity (mAh)
      */
     float reported_capacity();
 
     /**
-     *  TODO
+     *  Get the full capacity of the battery computed by the gauge algorithm
+     *  This is not the design capacity of the battery as the one given in the 
+     * @ref configure() function. Cell ages, temperature, cumber of cycles etc..
+     * are taken into acount to compute the full capacity
+     * 
+     * @returns full capacity (mAh)
      */
     float full_capacity();
 
     /**
-     *  Get temperature
-     *  @return Gauge temperature (TODO Gauge, battery ? internal, external ?)
+     *  Get temperature of the enabled thermistor
+     *  If more than one thermistor are used, it is an average the used thermistor
+     * 
+     *  @return temperature (°C)
      */
     float temperature();
 
@@ -267,26 +277,28 @@ public:
     float average_temperature();
 
     /**
-     *  Get the maximum temperature
+     *  Get the maximum temperature since device reset
      *
      *  @return Maximum temperature
      */
     int8_t max_temperature();
 
     /**
-     *  Get the minimum temperature
+     *  Get the minimum temperature since device reset
      *
      *  @return minimum temperature
      */
     int8_t min_temperature();
 
     /**
-     *  TODO
+     *  Get the cell age in hours
+     * 
+     * @returns cell age (hours)
      */
     float age();
 
     /**
-     *  Number of charge cycle completed (TODO ?)
+     *  Number of cycle completed (1 cycle is equivalent to 1 full charge and 1 full discharge)
      *
      *  @return number of cycle
      */
@@ -311,8 +323,8 @@ public:
     /**
      *  Set alerts on minimum and maximum battery percentage
      *
-     *  @param max_soc_threshold (%(TODO ?))
-     *  @param min_soc_threshold (%(TODO ?))
+     *  @param max_soc_threshold (%)
+     *  @param min_soc_threshold (%)
      */
     void set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold);
 
@@ -327,17 +339,19 @@ public:
     void disable_alerts();
 
     /**
-     *  TODO
+     *  Thoose are the gain and offset, specific to thermistor used, that the gauge
+     *  algorithm will use to copute temperature
+     *  See the gauge datasheet for more informations about the computations
      */
     void configure_thermistor(uint16_t gain, uint16_t offset);
 
     /**
-     *  TODO
+     *  Reset registers and gauge algorithm without loading the non-volatile memory backup
      */
     void restart_firmware();
 
     /**
-     *  TODO
+     *  Full reset of the gauge with with registers restoration from the non-volatile memory backup if enable
      */
     void reset();
 
