@@ -190,7 +190,6 @@ public:
      *  Get maximum current since device reset
      *
      *  \return maximum current (mA)
-     *
      */
     float max_current();
 
