@@ -408,7 +408,7 @@ void MAX17201::enable_alerts()
     uint16_t config;
     i2c_read_register(RegisterAddress::Config, &config); // Read config
     config |= (1 << 2); // Enable alerts
-    i2c_set_register(RegisterAddress::Config, config); // Read back config
+    i2c_set_register(RegisterAddress::Config, config); // write back config
 }
 
 void MAX17201::disable_alerts()
@@ -416,7 +416,7 @@ void MAX17201::disable_alerts()
     uint16_t config;
     i2c_read_register(RegisterAddress::Config, &config); // Read config
     config |= (0 << 2); // Disable alerts
-    i2c_set_register(RegisterAddress::Config, config); // Read back config
+    i2c_set_register(RegisterAddress::Config, config); // write back config
 }
 
 void MAX17201::configure_thermistor(uint16_t gain, uint16_t offset)
