@@ -476,14 +476,11 @@ void MAX17201::restart_firmware()
     uint16_t restart_cmd = 0x0001;
     i2c_set_register(RegisterAddress::Config2, restart_cmd);
     uint16_t reg = 0;
-    int cpt = 0;
-    do{
+    do {
         i2c_read_register(RegisterAddress::Config2, &reg);
         reg = reg & restart_cmd;
         wait_ms(5);
-        cpt++;
-    }while(reg == restart_cmd);
-    printf("%d\n\r", cpt);
+    } while (reg == restart_cmd);
 }
 
 void MAX17201::reset()
