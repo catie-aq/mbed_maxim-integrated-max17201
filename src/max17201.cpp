@@ -263,6 +263,19 @@ float MAX17201::full_capacity()
     return cap;
 }
 
+float MAX17201::design_capacity()
+{
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    }
+
+    uint16_t value;
+    i2c_read_register(RegisterAddress::DesignCap, &value);
+
+    float cap = value*TO_CAPACITY;
+    return cap;
+}
+
 float MAX17201::time_to_empty()
 {
     if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
@@ -462,7 +475,15 @@ void MAX17201::restart_firmware()
 
     uint16_t restart_cmd = 0x0001;
     i2c_set_register(RegisterAddress::Config2, restart_cmd);
-    wait_ms(500);
+    uint16_t reg = 0;
+    int cpt = 0;
+    do{
+        i2c_read_register(RegisterAddress::Config2, &reg);
+        reg = reg & restart_cmd;
+        wait_ms(5);
+        cpt++;
+    }while(reg == restart_cmd);
+    printf("%d\n\r", cpt);
 }
 
 void MAX17201::reset()
