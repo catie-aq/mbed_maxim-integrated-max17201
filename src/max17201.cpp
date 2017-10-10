@@ -35,10 +35,11 @@ MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
     _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
 {
     _i2c = i2c;
+    _interruptPin.mode(OpenDrain);
 }
 
 MAX17201::MAX17201(I2C* i2c):
-    _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(DIO1)
+    _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(PinName(NC))
 {
     _i2c = i2c;
 }
@@ -56,7 +57,97 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
         return false;
     }
 
-    restart_firmware();
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    }
+
+    /* ==== Non-volatile restore configuration ==== */
+    uint16_t config;
+    /* nNVCfg0 configuration: */
+    config = (0 << 15)  | // default cell model
+             (0 << 14)  | // default cell model
+             (0 << 13)  | // should always be 0
+             (0 << 12)  | // should always be 0
+             (1 << 11)  | // enable config and config2 restore
+             (0 << 10)  | // disable filter restore
+             (0 << 9)   | // disable relax config restore
+             (1 << 8)   | // enable learned configuration restore
+             (0 << 7)   | // disable IChgTerm restore
+             (0 << 6)   | // disable CGain and COff restore
+             (1 << 5)   | // enable VEmpty restore
+             (1 << 4)   | // enable DesignCap restore
+             (0 << 3)   | // disable MisCfg restore
+             (0 << 2)   | // disable age forecasting
+             (0 << 1)   | // disable HibCfg restore
+             (0 << 0);    // disable SBS
+
+    i2c_set_register(RegisterAddress::nNVCfg0, config); // nNVCfg0
+
+    /* nNVCfg1 configuration: */
+    config = (0 << 15)  | // enable TGain and Toff restore
+             (0 << 14)  | // disable CGTempCo restore
+             (0 << 13)  | // disable FullSOCThr restore
+             (0 << 12)  | // disable RFast and VShdnCfg restore
+             (0 << 11)  | // disable overcurrent comparators
+             (0 << 10)  | // should always be 0
+             (0 << 9)   | // should always be 0
+             (0 << 8)   | // should always be 0
+             (0 << 7)   | // should always be 0
+             (0 << 6)   | // should always be 0
+             (0 << 5)   | // should always be 0
+             (0 << 4)   | // use default Time to Full configuration
+             (1 << 3)   | // enable alert threshold restore
+             (1 << 2)   | // enable curve correction on thermistor
+             (1 << 1)   | // enable Converge to Empty functionalities
+             (0 << 0);    // should always be 0
+
+    i2c_set_register(RegisterAddress::nNVCfg1, config); // nNVCfg1
+
+    /* nNVCfg2 configuration: */
+    config = (1 << 15)  | // enable TimerH restore
+             (1 << 14)  | // enable MixSOC and VFSOC backup
+             (1 << 13)  | // enable MaxMinTemp restore
+             (1 << 12)  | // enable MaxMinVolt restore
+             (1 << 11)  | // enable MaxMinCurr restore
+             (1 << 10)  | // enable average VCell and Temp restore
+             (1 << 9)   | // enable fullCap and FullCapRep restore
+             (1 << 8)   | // enable average empty current learning restore
+             (0 << 7)   | // disable metal current sensing
+             (0 << 6)   |
+             (0 << 5)   |
+             (0 << 4)   |
+             (1 << 3)   |
+             (0 << 2)   |
+             (0 << 1)   |
+             (1 << 0); // bit 0 to 6 defines de number of cycles between each backup operations \
+                          limited to 202 backups \
+                          1 LSB = 0.5 cycles \
+                          We configure to perform backup every 5 cycles
+
+    i2c_set_register(RegisterAddress::nNVCfg2, config); // nNVCfg2
+
+    /* ==== nConfig register configuration ==== */
+
+    config = (0 << 15)  | // should always be 0
+             (0 << 14)  | // autoclear SOC alerts
+             (0 << 13)  | // autoclear temperature alerts
+             (0 << 12)  | // autoclear Voltage alerts
+             (0 << 11)  | // disable AIN1 shutdown
+             (0 << 10)  | // should always be 0
+             (1 << 9)   | // enable temperature measurement
+             (0 << 8)   | // use temperature measurement as decribed by PackCfg register
+             (0 << 7)   | // do not shutdown
+             (0 << 6)   | // disable communication shutdown capabilities
+             (0 << 5)   |
+             (1 << 4)   | // should always be 1
+             (0 << 3)   | // disable fast thermistor switch bias control
+             (0 << 2)   | // disable general alerts (Current, Voltage, SOC)
+             (0 << 1)   | // disable 1% SOC change alert
+             (0 << 0);    // disable temperature alerts
+
+    i2c_set_register(RegisterAddress::nConfig, config); // nConfig
+
+    /* ==== Thermistor configuration ==== */
 
     uint8_t temp1 = 0;
     uint8_t fgt = 0;
@@ -76,24 +167,22 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
         internal_temp = 1;
     }
 
-    uint16_t config = (fgt << 15)           |    // Temperature source selection
-                      (0 << 14)             |    // Should always be 0
-                      (temp2 << 13)         |    // 1 if a thermistor is present on AIN2
-                      (temp1 << 12)         |    // 1 if a thermistor is present on AIN1
-                      (internal_temp << 11) |    // Use internal thermistor
-                      (0 << 10)             |    // we use default parameter
-                      (0 << 9)              |    // we use default parameter
-                      (0 << 8)              |    // we use default parameter
-                      (0 << 7)              |    // we use default parameter
-                      (0 << 6)              |    // we use default parameter
-                      (0 << 5)              |    // we use default parameter
-                      (0 << 4)              |    // Should always be 0
-                      (number_of_cells & 0x0F);
+    config = (fgt << 15)           |    // Temperature source selection
+             (0 << 14)             |    // Should always be 0
+             (temp2 << 13)         |    // 1 if a thermistor is present on AIN2
+             (temp1 << 12)         |    // 1 if a thermistor is present on AIN1
+             (internal_temp << 11) |    // Use internal thermistor
+             (0 << 10)             |    // we use default parameter
+             (0 << 9)              |    // we use default parameter
+             (0 << 8)              |    // we use default parameter
+             (0 << 7)              |    // we use default parameter
+             (0 << 6)              |    // we use default parameter
+             (0 << 5)              |    // we use default parameter
+             (0 << 4)              |    // Should always be 0
+             (number_of_cells & 0x0F);
 
-    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
-        _i2cAddress = I2CAddress::ModelGaugeM5Address;
-    }
-    i2c_set_register(RegisterAddress::PackCfg, config);
+    //i2c_set_register(RegisterAddress::PackCfg, config);
+    i2c_set_register(RegisterAddress::nPackCfg, config); // nPackCfg
 
     /* Configure thermistor as Murata by default: */
     if (temp1 || temp2){
@@ -103,7 +192,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
     set_empty_voltage(empty_voltage);
     set_design_capacity(design_capacity);
 
-    wait_ms(100); // let time to software to compute new values
+    restart_firmware();
 
     return true;
 }
@@ -244,6 +333,8 @@ float MAX17201::reported_capacity()
     }
 
     uint16_t value;
+    i2c_read_register(RegisterAddress::Config, &value);
+    i2c_read_register(RegisterAddress::IAlrtTh, &value);
     i2c_read_register(RegisterAddress::RepCap, &value);
 
     float cap = value*TO_CAPACITY;
@@ -382,60 +473,72 @@ float MAX17201::cycle_count()
 
 void MAX17201::set_current_alerts(float max_current_threshold, float min_current_threshold)
 {
-    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
-        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
     }
 
     int8_t max_thr = (max_current_threshold*1000*R_SENSE)/400;
     int8_t min_thr = (min_current_threshold*1000*R_SENSE)/400;
 
     uint16_t data = ((max_thr & 0xFF) << 8) | (min_thr & 0xFF); // set threshold
-    i2c_set_register(RegisterAddress::IAlrtTh, data);
+    i2c_set_register(RegisterAddress::nIAlrtTh, data);
 }
 
 void MAX17201::set_voltage_alerts(float max_voltage_threshold, float min_voltage_threshold)
 {
-    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
-        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
     }
 
     uint8_t max_thr = (max_voltage_threshold*1000)/20;
     uint8_t min_thr = (min_voltage_threshold*1000)/20;
 
     uint16_t data = ((max_thr & 0xFF) << 8) | (min_thr & 0xFF); // set threshold
-    i2c_set_register(RegisterAddress::VAlrtTh, data);
+    i2c_set_register(RegisterAddress::nVAlrtTh, data);
 }
 
 void MAX17201::set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold)
 {
-    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
-        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
     }
 
     uint16_t data = (max_soc_threshold << 8) | min_soc_threshold; // set threshold
-    i2c_set_register(RegisterAddress::SAlrtTh, data);
+    i2c_set_register(RegisterAddress::nSAlrtTh, data);
 }
 
 void MAX17201::enable_alerts()
 {
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    }
     uint16_t config;
-    i2c_read_register(RegisterAddress::Config, &config); // Read config
+    i2c_read_register(RegisterAddress::Config, &config); // nConfig
     config |= (1 << 2); // Enable alerts
     i2c_set_register(RegisterAddress::Config, config); // write back config
+    //restart_firmware();
 }
 
 void MAX17201::disable_alerts()
 {
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    }
     uint16_t config;
-    i2c_read_register(RegisterAddress::Config, &config); // Read config
+    i2c_read_register(RegisterAddress::nConfig, &config); // nConfig
     config |= (0 << 2); // Disable alerts
-    i2c_set_register(RegisterAddress::Config, config); // write back config
+    i2c_set_register(RegisterAddress::nConfig, config); // write back config
+    restart_firmware();
 }
 
 void MAX17201::configure_thermistor(uint16_t gain, uint16_t offset)
 {
-    i2c_set_register(RegisterAddress::TGain, gain);
-    i2c_set_register(RegisterAddress::Toff, offset);
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    }
+
+    i2c_set_register(RegisterAddress::nTGain, gain);
+    i2c_set_register(RegisterAddress::nTOff, offset);
 }
 
 void MAX17201::set_empty_voltage(float VEmpty)
@@ -443,11 +546,11 @@ void MAX17201::set_empty_voltage(float VEmpty)
     uint16_t data;
     data = ((static_cast<uint16_t>(VEmpty*100) & 0x1FF) << 7) | (static_cast<uint8_t>((VEmpty+0.5)*25) & 0x7F);
 
-    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
-        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
     }
 
-    i2c_set_register(RegisterAddress::VEmpty, data);
+    i2c_set_register(RegisterAddress::nVEmpty, data);
 }
 
 void MAX17201::set_design_capacity(uint16_t design_capacity)
@@ -455,16 +558,15 @@ void MAX17201::set_design_capacity(uint16_t design_capacity)
     uint16_t data;
     data = static_cast<uint16_t>(design_capacity/TO_CAPACITY);
 
-    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
-        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
+        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
     }
 
-    i2c_set_register(RegisterAddress::DesignCap, data);
-    i2c_set_register(RegisterAddress::FullCap, data);
-    i2c_set_register(RegisterAddress::FullCapRep, data);
+    i2c_set_register(RegisterAddress::nDesignCap, data); // nDesignCap
+    i2c_set_register(RegisterAddress::nFullCapRep, data); // nFullCapRep
 
     data = static_cast<uint16_t>((design_capacity*1.1)/TO_CAPACITY);
-    i2c_set_register(RegisterAddress::FullCapNom, data);
+    i2c_set_register(RegisterAddress::nFullCapNom, data); // nFullCapNom
 }
 
 void MAX17201::restart_firmware()
@@ -475,9 +577,12 @@ void MAX17201::restart_firmware()
 
     uint16_t restart_cmd = 0x0001;
     i2c_set_register(RegisterAddress::Config2, restart_cmd);
-    uint16_t reg = 0;
+    uint16_t reg = 1;
     do {
-        i2c_read_register(RegisterAddress::Config2, &reg);
+        uint8_t ret = i2c_read_register(RegisterAddress::Config2, &reg);
+        if (ret !=0) {
+            printf("i2c error\n");
+        }
         reg = reg & restart_cmd;
         wait_ms(5);
     } while (reg == restart_cmd);
