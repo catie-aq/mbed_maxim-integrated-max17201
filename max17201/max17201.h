@@ -261,6 +261,16 @@ public:
     float full_capacity();
 
     /*!
+     *  Get the design capacity of the battery returned by the gauge
+     *  This the capacity of the battery given in the
+     *  \ref configure() function. Cell ages, temperature, cumber of cycles etc..
+     *  are not taken into account to compute the design capacity
+     *
+     *  \return design capacity (mAh)
+     */
+    float design_capacity();
+
+    /*!
      *  Get temperature of the enabled thermistor
      *  If more than one thermistor are used, it is an average the used thermistor
      * 
