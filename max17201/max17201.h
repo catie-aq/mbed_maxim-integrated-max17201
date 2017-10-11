@@ -33,7 +33,7 @@ public:
     /* I2C addresses */
     enum class I2CAddress : char {
         ModelGaugeM5Address            = 0x6C,
-        NonVolatileMemoryAddress       = 0x16, // WARNING : This memory is limited to 7 writes. Then it is permanently locked.
+        ShadowRAMaddress               = 0x16,
         SBSDataAddress                 = 0x16
     };
 
@@ -145,7 +145,27 @@ public:
         AtAvSOC            = 0xDE,
         AtAvCap            = 0xDF,
 
-        CmdRegister        = 0x60
+        CmdRegister        = 0x60,
+
+        /* Non-volatile memory registers */
+        nVEmpty            = 0x9E,
+        nFullCapNom        = 0xA5,
+        nFullCapRep        = 0xA9,
+        nMaxMinCurr        = 0xAB,
+        nMaxMinVolt        = 0xAC,
+        nMaxMinTemp        = 0xAD,
+        nConfig            = 0xB0,
+        nDesignCap         = 0xB3,
+        nPackCfg           = 0xB5,
+        nNVCfg0            = 0xB8,
+        nNVCfg1            = 0xB9,
+        nNVCfg2            = 0xBA,
+        nVAlrtTh           = 0xC0,
+        nTAlrtTh           = 0xC1,
+        nSAlrtTh           = 0xC2,
+        nIAlrtTh           = 0xC3,
+        nTGain             = 0xCA,
+        nTOff              = 0xCB
     };
 
 
