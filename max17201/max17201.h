@@ -33,7 +33,7 @@ public:
     /* I2C addresses */
     enum class I2CAddress : char {
         ModelGaugeM5Address            = 0x6C,
-        NonVolatileMemoryAddress       = 0x16, // WARNING : This memory is limited to 7 writes. Then it is permanently locked.
+        ShadowRAMaddress               = 0x16,
         SBSDataAddress                 = 0x16
     };
 

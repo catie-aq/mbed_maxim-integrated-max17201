@@ -57,8 +57,8 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
         return false;
     }
 
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
 
     /* ==== Non-volatile restore configuration ==== */
@@ -141,7 +141,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (0 << 5)   |
              (1 << 4)   | // should always be 1
              (0 << 3)   | // disable fast thermistor switch bias control
-             (0 << 2)   | // disable general alerts (Current, Voltage, SOC)
+             (1 << 2)   | // disable general alerts (Current, Voltage, SOC)
              (0 << 1)   | // disable 1% SOC change alert
              (0 << 0);    // disable temperature alerts
 
@@ -473,8 +473,8 @@ float MAX17201::cycle_count()
 
 void MAX17201::set_current_alerts(float max_current_threshold, float min_current_threshold)
 {
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
 
     int8_t max_thr = (max_current_threshold*1000*R_SENSE)/400;
@@ -486,8 +486,8 @@ void MAX17201::set_current_alerts(float max_current_threshold, float min_current
 
 void MAX17201::set_voltage_alerts(float max_voltage_threshold, float min_voltage_threshold)
 {
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
 
     uint8_t max_thr = (max_voltage_threshold*1000)/20;
@@ -499,8 +499,8 @@ void MAX17201::set_voltage_alerts(float max_voltage_threshold, float min_voltage
 
 void MAX17201::set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold)
 {
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
 
     uint16_t data = (max_soc_threshold << 8) | min_soc_threshold; // set threshold
@@ -521,8 +521,8 @@ void MAX17201::enable_alerts()
 
 void MAX17201::disable_alerts()
 {
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
     uint16_t config;
     i2c_read_register(RegisterAddress::nConfig, &config); // nConfig
@@ -533,8 +533,8 @@ void MAX17201::disable_alerts()
 
 void MAX17201::configure_thermistor(uint16_t gain, uint16_t offset)
 {
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
 
     i2c_set_register(RegisterAddress::nTGain, gain);
@@ -546,8 +546,8 @@ void MAX17201::set_empty_voltage(float VEmpty)
     uint16_t data;
     data = ((static_cast<uint16_t>(VEmpty*100) & 0x1FF) << 7) | (static_cast<uint8_t>((VEmpty+0.5)*25) & 0x7F);
 
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
 
     i2c_set_register(RegisterAddress::nVEmpty, data);
@@ -558,8 +558,8 @@ void MAX17201::set_design_capacity(uint16_t design_capacity)
     uint16_t data;
     data = static_cast<uint16_t>(design_capacity/TO_CAPACITY);
 
-    if (_i2cAddress != I2CAddress::NonVolatileMemoryAddress){
-        _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
+        _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
 
     i2c_set_register(RegisterAddress::nDesignCap, data); // nDesignCap
@@ -605,7 +605,7 @@ uint8_t MAX17201::remaining_writes()
     i2c_set_register(RegisterAddress::CmdRegister, command);
     wait_ms(5); // tRECALL
 
-    _i2cAddress = I2CAddress::NonVolatileMemoryAddress;
+    _i2cAddress = I2CAddress::ShadowRAMaddress;
     uint16_t data = 0;
     i2c_read_register((RegisterAddress) 0xED, &data);
     _i2cAddress = I2CAddress::ModelGaugeM5Address;
