@@ -175,7 +175,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (temp1 << 12)         |    // 1 if a thermistor is present on AIN1
              (internal_temp << 11) |    // Use internal thermistor
              (1 << 10)             |    // we use default parameter
-             (0 << 9)              |    // we use default parameter // TODO
+             (0 << 9)              |    // we use default parameter
              (0 << 8)              |    // we use default parameter
              (0 << 7)              |    // we use default parameter
              (0 << 6)              |    // we use default parameter
