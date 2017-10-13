@@ -57,6 +57,8 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
         return false;
     }
 
+    reset();
+
     if (_i2cAddress != I2CAddress::ShadowRAMaddress){
         _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
