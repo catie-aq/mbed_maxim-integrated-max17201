@@ -187,7 +187,7 @@ public:
 
     /*!
      *  Get the gauge status
-     *  Each bit of the status register correspond to an alert. See StatusFlags
+     *  Each bit of the status register corresponds to an alert. See StatusFlags
      *
      *  \return The status register
      */
@@ -391,7 +391,7 @@ public:
     void disable_alerts();
 
     /*!
-     *  Disable alerts on voltage, current and state of charge
+     *  Disable temperature alerts
      */
     void disable_temperature_alerts();
 
