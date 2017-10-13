@@ -186,6 +186,14 @@ public:
             bool use_external_thermistor1 = false, bool use_external_thermistor2 = false);
 
     /*!
+     *  Get the gauge status
+     *  Each bit of the status register correspond to an alert. See StatusFlags
+     *
+     *  \return The status register
+     */
+    uint16_t status();
+
+    /*!
      *  Get battery state of charge (%)
      *
      *  \return Percentage of battery remaining
@@ -334,6 +342,14 @@ public:
     float cycle_count();
 
     /*!
+     *  Set alerts on minimum and maximum temperature
+     *
+     *  \param max_temperature_threshold (°C)
+     *  \param min_temperature_threshold (°C)
+     */
+    void set_temperature_alerts(int8_t max_temperature_threshold, int8_t min_temperature_threshold);
+
+    /*!
      *  Set alerts on minimum and maximum current
      *
      *  \param max_current_threshold (mA)
@@ -363,9 +379,21 @@ public:
     void enable_alerts();
 
     /*!
+     *  Enable alerts on temperature
+     *  Temperature alerts are not auto cleared. Status register should be updated to clear
+     *  the temperature alert flag
+     */
+    void enable_temperature_alerts();
+
+    /*!
      *  Disable alerts on voltage, current and state of charge
      */
     void disable_alerts();
+
+    /*!
+     *  Disable alerts on voltage, current and state of charge
+     */
+    void disable_temperature_alerts();
 
     /*!
      *  Thoose are the gain and offset, specific to thermistor used, that the gauge
