@@ -195,6 +195,24 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
     set_design_capacity(design_capacity);
 
     restart_firmware();
+    
+    _i2cAddress = I2CAddress::ModelGaugeM5Address;
+
+    config = (fgt << 15)           |    // Temperature source selection
+             (0 << 14)             |    // Should always be 0
+             (temp2 << 13)         |    // 1 if a thermistor is present on AIN2
+             (temp1 << 12)         |    // 1 if a thermistor is present on AIN1
+             (internal_temp << 11) |    // Use internal thermistor
+             (1 << 10)             |    // we use default parameter
+             (0 << 9)              |    // we use default parameter
+             (0 << 8)              |    // we use default parameter
+             (0 << 7)              |    // we use default parameter
+             (0 << 6)              |    // we use default parameter
+             (0 << 5)              |    // we use default parameter
+             (0 << 4)              |    // Should always be 0
+             (number_of_cells & 0x0F);
+
+    i2c_set_register(RegisterAddress::PackCfg, config); // PackCfg
 
     wait_ms(100); // let time to software to compute new values
 
