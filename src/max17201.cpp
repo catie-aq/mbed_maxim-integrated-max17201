@@ -183,7 +183,6 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (0 << 4)              |    // Should always be 0
              (number_of_cells & 0x0F);
 
-    //i2c_set_register(RegisterAddress::PackCfg, config);
     i2c_set_register(RegisterAddress::nPackCfg, config); // nPackCfg
 
     /* Configure thermistor as Murata by default: */
@@ -225,7 +224,7 @@ uint16_t MAX17201::status()
         _i2cAddress = I2CAddress::ModelGaugeM5Address;
     }
     uint16_t status;
-    i2c_read_register(RegisterAddress::Status, &status); // nConfig
+    i2c_read_register(RegisterAddress::Status, &status);
 
     return status;
 }
