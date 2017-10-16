@@ -57,6 +57,8 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
         return false;
     }
 
+    reset();
+
     if (_i2cAddress != I2CAddress::ShadowRAMaddress){
         _i2cAddress = I2CAddress::ShadowRAMaddress;
     }
@@ -68,7 +70,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (0 << 14)  | // default cell model
              (0 << 13)  | // should always be 0
              (0 << 12)  | // should always be 0
-             (1 << 11)  | // enable config and config2 restore
+             (0 << 11)  | // disable config and config2 restore
              (0 << 10)  | // disable filter restore
              (0 << 9)   | // disable relax config restore
              (1 << 8)   | // enable learned configuration restore
@@ -96,7 +98,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (0 << 6)   | // should always be 0
              (0 << 5)   | // should always be 0
              (0 << 4)   | // use default Time to Full configuration
-             (1 << 3)   | // enable alert threshold restore
+             (0 << 3)   | // disable alert threshold restore
              (1 << 2)   | // enable curve correction on thermistor
              (1 << 1)   | // enable Converge to Empty functionalities
              (0 << 0);    // should always be 0
@@ -141,7 +143,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (0 << 5)   |
              (1 << 4)   | // should always be 1
              (0 << 3)   | // disable fast thermistor switch bias control
-             (1 << 2)   | // disable general alerts (Current, Voltage, SOC)
+             (0 << 2)   | // disable general alerts (Current, Voltage, SOC)
              (0 << 1)   | // disable 1% SOC change alert
              (0 << 0);    // disable temperature alerts
 
@@ -172,7 +174,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (temp2 << 13)         |    // 1 if a thermistor is present on AIN2
              (temp1 << 12)         |    // 1 if a thermistor is present on AIN1
              (internal_temp << 11) |    // Use internal thermistor
-             (0 << 10)             |    // we use default parameter
+             (1 << 10)             |    // we use default parameter
              (0 << 9)              |    // we use default parameter
              (0 << 8)              |    // we use default parameter
              (0 << 7)              |    // we use default parameter
@@ -194,7 +196,20 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 
     restart_firmware();
 
+    wait_ms(100); // let time to software to compute new values
+
     return true;
+}
+
+uint16_t MAX17201::status()
+{
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    }
+    uint16_t status;
+    i2c_read_register(RegisterAddress::Status, &status); // nConfig
+
+    return status;
 }
 
 float MAX17201::state_of_charge()
@@ -471,40 +486,50 @@ float MAX17201::cycle_count()
     return cycles;
 }
 
+void MAX17201::set_temperature_alerts(int8_t max_temperature_threshold, int8_t min_temperature_threshold)
+{
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    }
+
+    uint16_t data = ((max_temperature_threshold & 0xFF) << 8) | (min_temperature_threshold & 0xFF); // set threshold
+    i2c_set_register(RegisterAddress::TAlrtTh, data);
+}
+
 void MAX17201::set_current_alerts(float max_current_threshold, float min_current_threshold)
 {
-    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
-        _i2cAddress = I2CAddress::ShadowRAMaddress;
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
     }
 
     int8_t max_thr = (max_current_threshold*1000*R_SENSE)/400;
     int8_t min_thr = (min_current_threshold*1000*R_SENSE)/400;
 
     uint16_t data = ((max_thr & 0xFF) << 8) | (min_thr & 0xFF); // set threshold
-    i2c_set_register(RegisterAddress::nIAlrtTh, data);
+    i2c_set_register(RegisterAddress::IAlrtTh, data);
 }
 
 void MAX17201::set_voltage_alerts(float max_voltage_threshold, float min_voltage_threshold)
 {
-    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
-        _i2cAddress = I2CAddress::ShadowRAMaddress;
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
     }
 
     uint8_t max_thr = (max_voltage_threshold*1000)/20;
     uint8_t min_thr = (min_voltage_threshold*1000)/20;
 
     uint16_t data = ((max_thr & 0xFF) << 8) | (min_thr & 0xFF); // set threshold
-    i2c_set_register(RegisterAddress::nVAlrtTh, data);
+    i2c_set_register(RegisterAddress::VAlrtTh, data);
 }
 
 void MAX17201::set_state_of_charge_alerts(uint8_t max_soc_threshold, uint8_t min_soc_threshold)
 {
-    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
-        _i2cAddress = I2CAddress::ShadowRAMaddress;
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
     }
 
     uint16_t data = (max_soc_threshold << 8) | min_soc_threshold; // set threshold
-    i2c_set_register(RegisterAddress::nSAlrtTh, data);
+    i2c_set_register(RegisterAddress::SAlrtTh, data);
 }
 
 void MAX17201::enable_alerts()
@@ -516,19 +541,39 @@ void MAX17201::enable_alerts()
     i2c_read_register(RegisterAddress::Config, &config); // nConfig
     config |= (1 << 2); // Enable alerts
     i2c_set_register(RegisterAddress::Config, config); // write back config
-    //restart_firmware();
+}
+
+void MAX17201::enable_temperature_alerts()
+{
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    }
+    uint16_t config;
+    i2c_read_register(RegisterAddress::Config2, &config); // nConfig
+    config |= (1 << 6); // Enable temperature alerts
+    i2c_set_register(RegisterAddress::Config2, config); // write back config
 }
 
 void MAX17201::disable_alerts()
 {
-    if (_i2cAddress != I2CAddress::ShadowRAMaddress){
-        _i2cAddress = I2CAddress::ShadowRAMaddress;
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
     }
     uint16_t config;
-    i2c_read_register(RegisterAddress::nConfig, &config); // nConfig
-    config |= (0 << 2); // Disable alerts
-    i2c_set_register(RegisterAddress::nConfig, config); // write back config
-    restart_firmware();
+    i2c_read_register(RegisterAddress::Config, &config); // nConfig
+    config = config &(0xFFFB); // Disable alerts
+    i2c_set_register(RegisterAddress::Config, config); // write back config
+}
+
+void MAX17201::disable_temperature_alerts()
+{
+    if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
+        _i2cAddress = I2CAddress::ModelGaugeM5Address;
+    }
+    uint16_t config;
+    i2c_read_register(RegisterAddress::Config2, &config); // nConfig
+    config = config &(0xFFBF); // Disable temperature alerts
+    i2c_set_register(RegisterAddress::Config2, config); // write back config
 }
 
 void MAX17201::configure_thermistor(uint16_t gain, uint16_t offset)
