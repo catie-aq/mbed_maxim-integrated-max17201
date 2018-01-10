@@ -220,15 +220,17 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 
     if(enable_alert)
     {
-       	// here, configure the limits values of alerts...
+       	// here, set the alert threshold function
+    	set_temperature_alerts(MAX_TEMPERATURE_ALERT, MIN_TEMPERATURE_ALERT);
+    	set_voltage_alerts(MAX_VOLTAGE_ALERT, MIN_VOLTAGE_ALERT);
 
-    	// alert max17201 enable
+    	// max17201 alert enable
     	enable_alerts();
     	enable_temperature_alerts();
 
     	_interruptPin.enable_irq(); // interruption enable
 
-    	wait_ms(100); // let time to software to compute new values
+    	wait_ms(250); // let time to software to compute new values
     }
 
 
