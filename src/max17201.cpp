@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-# include "max17201.h"
+#include "max17201.h"
 
 namespace sixtron {
 
@@ -31,6 +31,8 @@ namespace {
 
 }
 
+
+
 MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
     _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
 {
@@ -45,7 +47,7 @@ MAX17201::MAX17201(I2C* i2c):
 }
 
 bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, float empty_voltage,
-            bool use_external_thermistor1, bool use_external_thermistor2)
+            bool use_external_thermistor1, bool use_external_thermistor2, bool enable_alert)
 {
     if (number_of_cells > 15) {
         printf("Invalid number of cells ! 15 max allowed\n");
@@ -214,6 +216,21 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
     i2c_set_register(RegisterAddress::PackCfg, config); // PackCfg
 
     wait_ms(100); // let time to software to compute new values
+
+
+    if(enable_alert)
+    {
+       	// here, configure the limits values of alerts...
+
+    	// alert max17201 enable
+    	enable_alerts();
+    	enable_temperature_alerts();
+
+    	_interruptPin.enable_irq(); // interruption enable
+
+    	wait_ms(100); // let time to software to compute new values
+    }
+
 
     return true;
 }
@@ -661,6 +678,7 @@ void MAX17201::reset()
     wait_ms(10);
 }
 
+
 uint8_t MAX17201::remaining_writes()
 {
     uint16_t command = 0xE2FA; // Ask for remainings update
@@ -688,10 +706,35 @@ uint8_t MAX17201::remaining_writes()
     return (7 - i);
 }
 
+/*****
+ *
+ *
+ *
+ *****/
+
 void MAX17201::handle_alert()
 {
     //TODO : maybe use this function as a callback when an interrupt occurs on the interrupt pin ?
+
+
 }
+
+
+void MAX17201::cleardSOCi_bit()
+{
+	uint16_t temp = 0;
+	i2c_read_register(MAX17201::RegisterAddress::Status, &temp); // Status
+	temp &= 0xff7f; // clear dSOCi bit
+	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
+}
+
+/*****
+ *
+ *
+ *
+ *****/
+
+
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
 {
