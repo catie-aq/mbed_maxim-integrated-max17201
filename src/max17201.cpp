@@ -717,7 +717,7 @@ void MAX17201::clear_dSOCi_bit()
 	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
 }
 
-InterruptIn* MAX17201::get_interruptIn()
+InterruptIn* MAX17201::get_interruptPin()
 {
 	return &(this->_interruptPin);
 }
