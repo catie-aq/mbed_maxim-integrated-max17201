@@ -453,7 +453,7 @@ public:
     /*!
      *  clear dSOCi bit of Status register : not use
     */
-    void cleardSOCi_bit();
+    void clear_dSOCi_bit();
 
 private:
 
