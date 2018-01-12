@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, CATIE, All Rights Reserved
+ * Copyright (c) 2018, CATIE, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,12 +23,12 @@ namespace sixtron {
 
 #define R_SENSE            0.020 //Value of the sense resistor
 
-#define MAX_VOLTAGE_ALERT		4.2 // V
-#define MIN_VOLTAGE_ALERT		3.1 // V
-#define MAX_CURRENT_ALERT		500 // mA
-#define MIN_CURRENT_ALERT     	1 	// mA
-#define MAX_TEMPERATURE_ALERT	50 	// °C
-#define MIN_TEMPERATURE_ALERT	5	// °C
+#define MAX_VOLTAGE_ALERT        4.2 // V
+#define MIN_VOLTAGE_ALERT        3.1 // V
+#define MAX_CURRENT_ALERT        500 // mA
+#define MIN_CURRENT_ALERT        1 	 // mA
+#define MAX_TEMPERATURE_ALERT    50  // °C
+#define MIN_TEMPERATURE_ALERT    5   // °C
 
 /*!
  *  \class MAX17201
@@ -61,7 +61,6 @@ public:
         ALERT_BR              = (1 << 15)  /*!< Battery Removal */
     };
 
-
     /* Represents the different alert status for the MAX17048 */
      enum class StatusAlert : uint8_t {
          ALERT_POR_RST            = 0x01,  /*!< Power On Reset Indicator */
@@ -71,12 +70,12 @@ public:
          ALERT_dSOCI_             = 0x07,  /*!< 1% SOC change alert */
          ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
          ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
-         ALERT_SOC_L              = 0x0A, /*!< Minimum SOC Alert Threshold Exceeded */
-         ALERT_BATTERY_INSERT     = 0x0B, /*!< Battery Insertion */
-         ALERT_VOLTAGE_H          = 0x0C, /*!< Maximum Voltage Alert Threshold Exceeded */
-         ALERT_TEMP_H             = 0x0D, /*!< Maximum Temperature Alert Threshold Exceeded */
-         ALERT_SOC_H              = 0x0E, /*!< Maximum SOC Alert Threshold Exceeded */
-         ALERT_BATTERY_REMOVE     = 0x0F  /*!< Battery Removal */
+         ALERT_SOC_L              = 0x0A,  /*!< Minimum SOC Alert Threshold Exceeded */
+         ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
+         ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
+         ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
+         ALERT_SOC_H              = 0x0E,  /*!< Maximum SOC Alert Threshold Exceeded */
+         ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
      };
 
     enum class RegisterAddress : char {
@@ -196,7 +195,6 @@ public:
 
     MAX17201(I2C* i2c, PinName interruptPin);
     MAX17201(I2C* i2c);
-
     /*!
      *  Configure the gauge
      *
@@ -452,8 +450,13 @@ public:
 
     /*!
      *  clear dSOCi bit of Status register : not use
-    */
+     */
     void clear_dSOCi_bit();
+
+    /*!
+     *  get interrupt pin assigned to alrt1 signal
+     */
+    InterruptIn* get_interruptIn();
 
 private:
 
@@ -484,6 +487,7 @@ private:
     I2C* _i2c;
     I2CAddress _i2cAddress;
     InterruptIn _interruptPin;
+
 
 };
 
