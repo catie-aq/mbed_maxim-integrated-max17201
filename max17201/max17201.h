@@ -456,7 +456,7 @@ public:
     /*!
      *  get interrupt pin assigned to alrt1 signal
      */
-    InterruptIn* get_interruptIn();
+    InterruptIn* get_interruptPin();
 
 private:
 

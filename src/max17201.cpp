@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, CATIE, All Rights Reserved
+ * Copyright (c) 2018, CATIE, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +39,7 @@ MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
     _i2c = i2c;
     _interruptPin.mode(OpenDrain);
 }
+
 
 MAX17201::MAX17201(I2C* i2c):
     _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(PinName(NC))
@@ -217,22 +218,16 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 
     wait_ms(100); // let time to software to compute new values
 
-
-    if(enable_alert)
-    {
+    if (enable_alert){
        	// here, set the alert threshold function
     	set_temperature_alerts(MAX_TEMPERATURE_ALERT, MIN_TEMPERATURE_ALERT);
     	set_voltage_alerts(MAX_VOLTAGE_ALERT, MIN_VOLTAGE_ALERT);
-
     	// max17201 alert enable
     	enable_alerts();
     	enable_temperature_alerts();
-
     	_interruptPin.enable_irq(); // interruption enable
-
     	wait_ms(250); // let time to software to compute new values
     }
-
 
     return true;
 }
@@ -680,7 +675,6 @@ void MAX17201::reset()
     wait_ms(10);
 }
 
-
 uint8_t MAX17201::remaining_writes()
 {
     uint16_t command = 0xE2FA; // Ask for remainings update
@@ -715,13 +709,17 @@ void MAX17201::handle_alert()
 
 }
 
-
 void MAX17201::clear_dSOCi_bit()
 {
 	uint16_t temp = 0;
 	i2c_read_register(MAX17201::RegisterAddress::Status, &temp); // Status
 	temp &= 0xff7f; // clear dSOCi bit
 	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
+}
+
+InterruptIn* MAX17201::get_interruptIn()
+{
+	return &(this->_interruptPin);
 }
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
