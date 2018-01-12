@@ -708,35 +708,21 @@ uint8_t MAX17201::remaining_writes()
     return (7 - i);
 }
 
-/*****
- *
- *
- *
- *****/
 
 void MAX17201::handle_alert()
 {
     //TODO : maybe use this function as a callback when an interrupt occurs on the interrupt pin ?
 
-
 }
 
 
-void MAX17201::cleardSOCi_bit()
+void MAX17201::clear_dSOCi_bit()
 {
 	uint16_t temp = 0;
 	i2c_read_register(MAX17201::RegisterAddress::Status, &temp); // Status
 	temp &= 0xff7f; // clear dSOCi bit
 	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
 }
-
-/*****
- *
- *
- *
- *****/
-
-
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
 {
