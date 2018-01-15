@@ -711,6 +711,12 @@ InterruptIn* MAX17201::get_interruptPin()
 	return &(this->_interruptPin);
 }
 
+void MAX17201::set_callback(EventQueue *_queue, void (*func)())
+{
+	this->_interruptPin.fall(_queue->event(func));
+	this->_interruptPin.enable_irq(); // interruption enable
+}
+
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
 {
     static char data[3];
