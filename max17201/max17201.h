@@ -458,6 +458,11 @@ public:
      */
     InterruptIn* get_interruptPin();
 
+    /*!
+     *  set callback function on interrupt alrt1 signal
+     */
+    void set_callback(EventQueue *_queue, void (*func)());
+
 private:
 
     /*!
