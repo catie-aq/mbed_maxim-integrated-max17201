@@ -450,12 +450,7 @@ public:
     /*!
      *  set callback function on interrupt alrt1 signal
      */
-    void set_callback(void (*func)());
-
-    /*!
-     *  set callback EventQueue function on interrupt alrt1 signal
-     */
-    void set_callback_EventQueue(EventQueue *_queue, void (*func)());
+    void set_callback(Callback<void()> func);
 
 private:
 
