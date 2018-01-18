@@ -706,13 +706,7 @@ void MAX17201::clear_dSOCi_bit()
 	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
 }
 
-void MAX17201::set_callback(void (*func)())
-{
-	this->_interruptPin.fall(func);
-	this->_interruptPin.enable_irq(); // interruption enable
-}
-
-void MAX17201::set_callback_EventQueue(EventQueue *_queue, void (*func)())
+void MAX17201::set_callback(Callback<void()> func)
 {
 	this->_interruptPin.fall(func);
 	this->_interruptPin.enable_irq(); // interruption enable
