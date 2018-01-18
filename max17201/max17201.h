@@ -23,12 +23,6 @@ namespace sixtron {
 
 #define R_SENSE            0.020 //Value of the sense resistor
 
-#define MAX_VOLTAGE_ALERT        4.2 // V
-#define MIN_VOLTAGE_ALERT        3.1 // V
-#define MAX_CURRENT_ALERT        500 // mA
-#define MIN_CURRENT_ALERT        1 	 // mA
-#define MAX_TEMPERATURE_ALERT    50  // °C
-#define MIN_TEMPERATURE_ALERT    5   // °C
 
 /*!
  *  \class MAX17201
@@ -456,7 +450,12 @@ public:
     /*!
      *  set callback function on interrupt alrt1 signal
      */
-    void set_callback(EventQueue *_queue, void (*func)());
+    void set_callback(void (*func)());
+
+    /*!
+     *  set callback EventQueue function on interrupt alrt1 signal
+     */
+    void set_callback_EventQueue(EventQueue *_queue, void (*func)());
 
 private:
 
