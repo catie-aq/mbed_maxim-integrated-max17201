@@ -699,10 +699,21 @@ void MAX17201::clear_dSOCi_bit()
 	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
 }
 
+void MAX17201::clear_alertStatus_register()
+{
+	uint16_t temp = 0;
+	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
+}
+
 void MAX17201::set_callback(Callback<void()> func)
 {
 	this->_interruptPin.fall(func);
-	this->_interruptPin.enable_irq(); // interruption enable
+	if (func) {
+		this->_interruptPin.enable_irq(); //  ensure to clear bit interrupt register
+	} else {
+		this->_interruptPin.disable_irq(); // disable interrupt
+	}
+
 }
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
