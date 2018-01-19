@@ -438,11 +438,6 @@ public:
     uint8_t remaining_writes();
 
     /*!
-     *  Alert related functions : not use
-     */
-   void handle_alert();
-
-    /*!
      *  clear dSOCi bit of Status register : not use
      */
     void clear_dSOCi_bit();
