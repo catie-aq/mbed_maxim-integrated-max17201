@@ -448,9 +448,14 @@ public:
     void clear_alertStatus_register();
 
     /*!
-     *  set callback function on interrupt alrt1 signal
+     *  attach callback function on interrupt alrt1 signal
      */
-    void set_callback(Callback<void()> func);
+    void attach_callback(Callback<void()> func);
+
+    /*!
+     *  detach callback function on interrupt alrt1 signal
+     */
+    void detach_callback();
 
 private:
 
