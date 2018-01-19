@@ -438,9 +438,14 @@ public:
     uint8_t remaining_writes();
 
     /*!
-     *  clear dSOCi bit of Status register : not use
+     *  clear dSOCi bit of Status register
      */
     void clear_dSOCi_bit();
+
+    /*!
+     *  clear alertStatus register
+     */
+    void clear_alertStatus_register();
 
     /*!
      *  set callback function on interrupt alrt1 signal
