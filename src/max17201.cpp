@@ -691,13 +691,6 @@ uint8_t MAX17201::remaining_writes()
     return (7 - i);
 }
 
-
-void MAX17201::handle_alert()
-{
-    //TODO : maybe use this function as a callback when an interrupt occurs on the interrupt pin ?
-
-}
-
 void MAX17201::clear_dSOCi_bit()
 {
 	uint16_t temp = 0;
