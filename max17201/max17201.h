@@ -56,20 +56,20 @@ public:
     };
 
     /* Represents the different alert status for the MAX17048 */
-     enum class StatusAlert : uint8_t {
-         ALERT_POR_RST            = 0x01,  /*!< Power On Reset Indicator */
-         ALERT_CURRENT_L          = 0x02,  /*!< Minimum Current Alert Threshold Exceeded */
-         BATTERY_IS_PRESENT       = 0x03,  /*!< Battery presence indicator */
-         ALERT_CURRENT_H          = 0x06,  /*!< Maximum Current Alert Threshold Exceeded */
-         ALERT_dSOCI_             = 0x07,  /*!< 1% SOC change alert */
-         ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
-         ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
-         ALERT_SOC_L              = 0x0A,  /*!< Minimum SOC Alert Threshold Exceeded */
-         ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
-         ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
-         ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
-         ALERT_SOC_H              = 0x0E,  /*!< Maximum SOC Alert Threshold Exceeded */
-         ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
+    enum class StatusAlert : uint8_t {
+        ALERT_POR_RST            = 0x01,  /*!< Power On Reset Indicator */
+        ALERT_CURRENT_L          = 0x02,  /*!< Minimum Current Alert Threshold Exceeded */
+        BATTERY_IS_PRESENT       = 0x03,  /*!< Battery presence indicator */
+        ALERT_CURRENT_H          = 0x06,  /*!< Maximum Current Alert Threshold Exceeded */
+        ALERT_dSOCI_             = 0x07,  /*!< 1% SOC change alert */
+        ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
+        ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
+        ALERT_SOC_L              = 0x0A,  /*!< Minimum SOC Alert Threshold Exceeded */
+        ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
+        ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
+        ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
+        ALERT_SOC_H              = 0x0E,  /*!< Maximum SOC Alert Threshold Exceeded */
+        ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
      };
 
     enum class RegisterAddress : char {
