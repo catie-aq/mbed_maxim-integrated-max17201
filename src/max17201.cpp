@@ -134,7 +134,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
     /* ==== nConfig register configuration ==== */
 
     config = (0 << 15)  | // should always be 0
-             (0 << 14)  | // autoclear SOC alerts
+             (0 << 14)  | // autoclear state of charge alerts
              (0 << 13)  | // autoclear temperature alerts
              (0 << 12)  | // autoclear Voltage alerts
              (0 << 11)  | // disable AIN1 shutdown
@@ -146,8 +146,8 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
              (0 << 5)   |
              (1 << 4)   | // should always be 1
              (0 << 3)   | // disable fast thermistor switch bias control
-             (0 << 2)   | // disable general alerts (Current, Voltage, SOC)
-             (0 << 1)   | // disable 1% SOC change alert
+             (0 << 2)   | // disable general alerts (Current, Voltage, State of Charge)
+             (0 << 1)   | // disable 1% S change alert
              (0 << 0);    // disable temperature alerts
 
     i2c_set_register(RegisterAddress::nConfig, config); // nConfig
@@ -234,7 +234,7 @@ uint16_t MAX17201::status()
 
 float MAX17201::state_of_charge()
 {
-    float SOC;
+    float state_of_charge;
     uint16_t value;
 
     if (_i2cAddress != I2CAddress::ModelGaugeM5Address){
@@ -243,10 +243,10 @@ float MAX17201::state_of_charge()
 
     i2c_read_register(RegisterAddress::RepSOC, &value);
 
-    SOC = value * TO_PERCENTAGE;
-    SOC = SOC > 100 ? 100 : SOC;
-    SOC = SOC < 0 ? 0 : SOC;
-    return SOC;
+    state_of_charge = value * TO_PERCENTAGE;
+    state_of_charge = state_of_charge > 100 ? 100 : state_of_charge;
+    state_of_charge = state_of_charge < 0 ? 0 : state_of_charge;
+    return state_of_charge;
 }
 
 double MAX17201::current()

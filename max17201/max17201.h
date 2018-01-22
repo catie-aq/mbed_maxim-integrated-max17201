@@ -44,14 +44,14 @@ public:
         ALERT_CL              = (1 << 2),  /*!< Minimum Current Alert Threshold Exceeded */
         BATTERY_PRESENT       = (1 << 3),  /*!< Battery presence indicator */
         ALERT_CH              = (1 << 6),  /*!< Maximum Current Alert Threshold Exceeded */
-        ALERT_dSOCI           = (1 << 7),  /*!< 1% SOC change alert */
+        ALERT_dSOCI           = (1 << 7),  /*!< 1% State of Charge change alert */
         ALERT_VL              = (1 << 8),  /*!< Minimum Voltage Alert Threshold Exceeded */
         ALERT_TL              = (1 << 9),  /*!< Minimum Temperature Alert Threshold Exceeded */
         ALERT_SL              = (1 << 10), /*!< Minimum State of Charge Alert Threshold Exceeded */
         ALERT_BI              = (1 << 11), /*!< Battery Insertion */
         ALERT_VH              = (1 << 12), /*!< Maximum Voltage Alert Threshold Exceeded */
         ALERT_TH              = (1 << 13), /*!< Maximum Temperature Alert Threshold Exceeded */
-        ALERT_SH              = (1 << 14), /*!< Maximum SOC Alert Threshold Exceeded */
+        ALERT_SH              = (1 << 14), /*!< Maximum State of Charge Alert Threshold Exceeded */
         ALERT_BR              = (1 << 15)  /*!< Battery Removal */
     };
 
@@ -61,14 +61,14 @@ public:
         ALERT_CURRENT_L          = 0x02,  /*!< Minimum Current Alert Threshold Exceeded */
         BATTERY_IS_PRESENT       = 0x03,  /*!< Battery presence indicator */
         ALERT_CURRENT_H          = 0x06,  /*!< Maximum Current Alert Threshold Exceeded */
-        ALERT_dSOCI_             = 0x07,  /*!< 1% SOC change alert */
+        ALERT_dSOCI_             = 0x07,  /*!< 1% Stage of Charge change alert */
         ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
         ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
         ALERT_SOC_L              = 0x0A,  /*!< Minimum State of Charge Alert Threshold Exceeded */
         ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
         ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
         ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
-        ALERT_SOC_H              = 0x0E,  /*!< Maximum SOC Alert Threshold Exceeded */
+        ALERT_SOC_H              = 0x0E,  /*!< Maximum State of Charge Alert Threshold Exceeded */
         ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
      };
 
