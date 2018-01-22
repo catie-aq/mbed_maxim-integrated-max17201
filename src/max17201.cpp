@@ -693,28 +693,28 @@ uint8_t MAX17201::remaining_writes()
 
 void MAX17201::clear_dSOCi_bit()
 {
-	uint16_t temp = 0;
-	i2c_read_register(MAX17201::RegisterAddress::Status, &temp); // Status
-	temp &= 0xff7f; // clear dSOCi bit
-	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
+    uint16_t temp = 0;
+    i2c_read_register(MAX17201::RegisterAddress::Status, &temp); // Status
+    temp &= 0xff7f; // clear dSOCi bit
+    i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
 }
 
 void MAX17201::clear_alertStatus_register()
 {
-	uint16_t temp = 0;
-	i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
+    uint16_t temp = 0;
+    i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
 }
 
 void MAX17201::attach_callback(Callback<void()> func)
 {
-	_interruptPin.fall(func);
+    _interruptPin.fall(func);
     _interruptPin.enable_irq();
 }
 
 void MAX17201::detach_callback()
 {
-	_interruptPin.fall(NULL);
-	_interruptPin.disable_irq();
+    _interruptPin.fall(NULL);
+    _interruptPin.disable_irq();
 }
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
