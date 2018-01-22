@@ -705,16 +705,15 @@ void MAX17201::clear_alertStatus_register()
     i2c_set_register(MAX17201::RegisterAddress::Status, temp); // write back Status
 }
 
-void MAX17201::attach_callback(Callback<void()> func)
+void MAX17201::alert_callback(Callback<void()> func)
 {
-    _interruptPin.fall(func);
-    _interruptPin.enable_irq();
-}
-
-void MAX17201::detach_callback()
-{
-    _interruptPin.fall(NULL);
-    _interruptPin.disable_irq();
+    if (func) {
+        _interruptPin.fall(func);
+        _interruptPin.enable_irq();
+    } else {
+        _interruptPin.fall(NULL);
+        _interruptPin.disable_irq();
+    }
 }
 
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)

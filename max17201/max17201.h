@@ -447,15 +447,11 @@ public:
      */
     void clear_alertStatus_register();
 
-    /*!
-     *  attach callback function on interrupt alrt1 signal
+    /*! Set alert callback
+     *
+     * \param func A pointer to a void function, or 0 to set as none
      */
-    void attach_callback(Callback<void()> func);
-
-    /*!
-     *  detach callback function on interrupt alrt1 signal
-     */
-    void detach_callback();
+    void alert_callback(Callback<void()> func);
 
 private:
 
