@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2018, CATIE, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,8 @@
 
 #include "mbed.h"
 
-namespace sixtron {
+namespace sixtron
+{
 
 #define R_SENSE            0.020 //Value of the sense resistor
 
@@ -69,7 +70,7 @@ public:
         ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
         ALERT_SOC_H              = 0x0E,  /*!< Maximum State of Charge Alert Threshold Exceeded */
         ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
-     };
+    };
 
     enum class RegisterAddress : char {
         /* ModelGauge m5 Registers */
@@ -185,8 +186,8 @@ public:
         nTOff              = 0xCB
     };
 
-    MAX17201(I2C* i2c, PinName interruptPin);
-    MAX17201(I2C* i2c);
+    MAX17201(I2C *i2c, PinName interruptPin);
+    MAX17201(I2C *i2c);
     /*!
      *  Configure the gauge
      *
@@ -198,7 +199,8 @@ public:
      *  \param enable_alert : default is false
      *  \return true on success, false on failure
      */
-    bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800, float empty_voltage = 3.1,
+    bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800,
+            float empty_voltage = 3.1,
             bool use_external_thermistor1 = false, bool use_external_thermistor2 = false);
 
     /*!
@@ -289,17 +291,17 @@ public:
 
     /*!
      *  Get the remaining capacity of the battery
-     * 
+     *
      *  \return remaining capacicity (mAh)
      */
     float reported_capacity();
 
     /*!
      *  Get the full capacity of the battery computed by the gauge algorithm
-     *  This is not the design capacity of the battery as the one given in the 
+     *  This is not the design capacity of the battery as the one given in the
      *  \ref configure() function. Cell ages, temperature, cumber of cycles etc..
      *  are taken into acount to compute the full capacity
-     * 
+     *
      *  \return full capacity (mAh)
      */
     float full_capacity();
@@ -317,7 +319,7 @@ public:
     /*!
      *  Get temperature of the enabled thermistor
      *  If more than one thermistor are used, it is an average the used thermistor
-     * 
+     *
      *  \return temperature (°C)
      */
     float temperature();
@@ -345,7 +347,7 @@ public:
 
     /*!
      *  Get the cell age in hours
-     * 
+     *
      *  \return cell age (hours)
      */
     float age();
@@ -472,12 +474,12 @@ private:
      */
     void set_design_capacity(uint16_t design_capacity);
 
-    int i2c_read_register(RegisterAddress address, uint16_t* value);
-    int i2c_read_register(RegisterAddress address, int16_t* value);
+    int i2c_read_register(RegisterAddress address, uint16_t *value);
+    int i2c_read_register(RegisterAddress address, int16_t *value);
     int i2c_set_register(RegisterAddress address, uint16_t value);
     int i2c_set_register(RegisterAddress address, int16_t value);
 
-    I2C* _i2c;
+    I2C *_i2c;
     I2CAddress _i2cAddress;
     InterruptIn _interruptPin;
 
