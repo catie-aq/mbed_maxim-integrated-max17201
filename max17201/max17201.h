@@ -14,15 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MAX17201_H
-#define MAX17201_H
+#ifndef CATIE_SIXTRON_MAX17201_H_
+#define CATIE_SIXTRON_MAX17201_H_
 
 #include "mbed.h"
 
 namespace sixtron {
 
 #define R_SENSE            0.020 //Value of the sense resistor
-
 
 /*!
  *  \class MAX17201
@@ -185,7 +184,6 @@ public:
         nTGain             = 0xCA,
         nTOff              = 0xCB
     };
-
 
     MAX17201(I2C* i2c, PinName interruptPin);
     MAX17201(I2C* i2c);
@@ -487,4 +485,4 @@ private:
 
 } // namespace sixtron
 
-#endif // MAX17201_H
+#endif // CATIE_SIXTRON_MAX17201_H_

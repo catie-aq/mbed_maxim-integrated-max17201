@@ -20,7 +20,6 @@
 namespace sixtron {
 
 namespace {
-
 #define TO_PERCENTAGE     (1./256)
 #define TO_CAPACITY       (0.005/R_SENSE)          // mAh
 #define TO_VOLTAGE        0.078125                 // mV
@@ -28,10 +27,7 @@ namespace {
 #define TO_TEMP           (1./256)                 // °C
 #define TO_RESISTANCE     (1./4096)                // Ω
 #define TO_SECONDS        5.625                    // s
-
 }
-
-
 
 MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
     _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
@@ -39,7 +35,6 @@ MAX17201::MAX17201(I2C* i2c, PinName interruptPin):
     _i2c = i2c;
     _interruptPin.mode(OpenDrain);
 }
-
 
 MAX17201::MAX17201(I2C* i2c):
     _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(PinName(NC))
