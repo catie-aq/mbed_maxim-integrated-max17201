@@ -47,7 +47,7 @@ public:
         ALERT_dSOCI           = (1 << 7),  /*!< 1% SOC change alert */
         ALERT_VL              = (1 << 8),  /*!< Minimum Voltage Alert Threshold Exceeded */
         ALERT_TL              = (1 << 9),  /*!< Minimum Temperature Alert Threshold Exceeded */
-        ALERT_SL              = (1 << 10), /*!< Minimum SOC Alert Threshold Exceeded */
+        ALERT_SL              = (1 << 10), /*!< Minimum State of Charge Alert Threshold Exceeded */
         ALERT_BI              = (1 << 11), /*!< Battery Insertion */
         ALERT_VH              = (1 << 12), /*!< Maximum Voltage Alert Threshold Exceeded */
         ALERT_TH              = (1 << 13), /*!< Maximum Temperature Alert Threshold Exceeded */
@@ -64,7 +64,7 @@ public:
         ALERT_dSOCI_             = 0x07,  /*!< 1% SOC change alert */
         ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
         ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
-        ALERT_SOC_L              = 0x0A,  /*!< Minimum SOC Alert Threshold Exceeded */
+        ALERT_SOC_L              = 0x0A,  /*!< Minimum State of Charge Alert Threshold Exceeded */
         ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
         ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
         ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
@@ -486,7 +486,6 @@ private:
     I2C* _i2c;
     I2CAddress _i2cAddress;
     InterruptIn _interruptPin;
-
 
 };
 
