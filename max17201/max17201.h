@@ -1,25 +1,26 @@
 /*
- * Copyright (c) 2016, CATIE, All Rights Reserved
+ * Copyright (c) 2018, CATIE, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MAX17201_H
-#define MAX17201_H
+#ifndef CATIE_SIXTRON_MAX17201_H_
+#define CATIE_SIXTRON_MAX17201_H_
 
 #include "mbed.h"
 
-namespace sixtron {
+namespace sixtron
+{
 
 #define R_SENSE            0.020 //Value of the sense resistor
 
@@ -43,15 +44,32 @@ public:
         ALERT_CL              = (1 << 2),  /*!< Minimum Current Alert Threshold Exceeded */
         BATTERY_PRESENT       = (1 << 3),  /*!< Battery presence indicator */
         ALERT_CH              = (1 << 6),  /*!< Maximum Current Alert Threshold Exceeded */
-        ALERT_dSOCI           = (1 << 7),  /*!< 1% SOC change alert */
+        ALERT_dSOCI           = (1 << 7),  /*!< 1% State of Charge change alert */
         ALERT_VL              = (1 << 8),  /*!< Minimum Voltage Alert Threshold Exceeded */
         ALERT_TL              = (1 << 9),  /*!< Minimum Temperature Alert Threshold Exceeded */
-        ALERT_SL              = (1 << 10), /*!< Minimum SOC Alert Threshold Exceeded */
+        ALERT_SL              = (1 << 10), /*!< Minimum State of Charge Alert Threshold Exceeded */
         ALERT_BI              = (1 << 11), /*!< Battery Insertion */
         ALERT_VH              = (1 << 12), /*!< Maximum Voltage Alert Threshold Exceeded */
         ALERT_TH              = (1 << 13), /*!< Maximum Temperature Alert Threshold Exceeded */
-        ALERT_SH              = (1 << 14), /*!< Maximum SOC Alert Threshold Exceeded */
+        ALERT_SH              = (1 << 14), /*!< Maximum State of Charge Alert Threshold Exceeded */
         ALERT_BR              = (1 << 15)  /*!< Battery Removal */
+    };
+
+    /* Represents the different alert status for the MAX17048 */
+    enum class StatusAlert : uint8_t {
+        ALERT_POR_RST            = 0x01,  /*!< Power On Reset Indicator */
+        ALERT_CURRENT_L          = 0x02,  /*!< Minimum Current Alert Threshold Exceeded */
+        BATTERY_IS_PRESENT       = 0x03,  /*!< Battery presence indicator */
+        ALERT_CURRENT_H          = 0x06,  /*!< Maximum Current Alert Threshold Exceeded */
+        ALERT_dSOCI_             = 0x07,  /*!< 1% Stage of Charge change alert */
+        ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
+        ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
+        ALERT_SOC_L              = 0x0A,  /*!< Minimum State of Charge Alert Threshold Exceeded */
+        ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
+        ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
+        ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
+        ALERT_SOC_H              = 0x0E,  /*!< Maximum State of Charge Alert Threshold Exceeded */
+        ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
     };
 
     enum class RegisterAddress : char {
@@ -168,10 +186,8 @@ public:
         nTOff              = 0xCB
     };
 
-
-    MAX17201(I2C* i2c, PinName interruptPin);
-    MAX17201(I2C* i2c);
-
+    MAX17201(I2C *i2c, PinName interruptPin);
+    MAX17201(I2C *i2c);
     /*!
      *  Configure the gauge
      *
@@ -180,9 +196,11 @@ public:
      *  \param empty_voltage : voltage (V) bellow which battery is considered empty, default is 3.1V
      *  \param use_external_thermistor1 : default is false
      *  \param use_external_thermistor2 : default is false (in case both are false, will use internal thermistor)
+     *  \param enable_alert : default is false
      *  \return true on success, false on failure
      */
-    bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800, float empty_voltage = 3.1,
+    bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800,
+            float empty_voltage = 3.1,
             bool use_external_thermistor1 = false, bool use_external_thermistor2 = false);
 
     /*!
@@ -273,17 +291,17 @@ public:
 
     /*!
      *  Get the remaining capacity of the battery
-     * 
+     *
      *  \return remaining capacicity (mAh)
      */
     float reported_capacity();
 
     /*!
      *  Get the full capacity of the battery computed by the gauge algorithm
-     *  This is not the design capacity of the battery as the one given in the 
+     *  This is not the design capacity of the battery as the one given in the
      *  \ref configure() function. Cell ages, temperature, cumber of cycles etc..
      *  are taken into acount to compute the full capacity
-     * 
+     *
      *  \return full capacity (mAh)
      */
     float full_capacity();
@@ -301,7 +319,7 @@ public:
     /*!
      *  Get temperature of the enabled thermistor
      *  If more than one thermistor are used, it is an average the used thermistor
-     * 
+     *
      *  \return temperature (°C)
      */
     float temperature();
@@ -329,7 +347,7 @@ public:
 
     /*!
      *  Get the cell age in hours
-     * 
+     *
      *  \return cell age (hours)
      */
     float age();
@@ -420,9 +438,20 @@ public:
     uint8_t remaining_writes();
 
     /*!
-     *  Alert related functions
+     *  clear dSOCi bit of Status register
      */
-    void handle_alert();
+    void clear_dSOCi_bit();
+
+    /*!
+     *  clear alertStatus register
+     */
+    void clear_alertStatus_register();
+
+    /*! Set alert callback
+     *
+     * \param func A pointer to a void function, or 0 to set as none
+     */
+    void alert_callback(Callback<void()> func);
 
 private:
 
@@ -445,12 +474,12 @@ private:
      */
     void set_design_capacity(uint16_t design_capacity);
 
-    int i2c_read_register(RegisterAddress address, uint16_t* value);
-    int i2c_read_register(RegisterAddress address, int16_t* value);
+    int i2c_read_register(RegisterAddress address, uint16_t *value);
+    int i2c_read_register(RegisterAddress address, int16_t *value);
     int i2c_set_register(RegisterAddress address, uint16_t value);
     int i2c_set_register(RegisterAddress address, int16_t value);
 
-    I2C* _i2c;
+    I2C *_i2c;
     I2CAddress _i2cAddress;
     InterruptIn _interruptPin;
 
@@ -458,4 +487,4 @@ private:
 
 } // namespace sixtron
 
-#endif // MAX17201_H
+#endif // CATIE_SIXTRON_MAX17201_H_
