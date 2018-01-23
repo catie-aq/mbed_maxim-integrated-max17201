@@ -22,8 +22,6 @@
 namespace sixtron
 {
 
-#define R_SENSE            0.020 //Value of the sense resistor
-
 /*!
  *  \class MAX17201
  *  MAX17201 gauge driver
