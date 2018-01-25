@@ -19,8 +19,7 @@
 
 #include "mbed.h"
 
-namespace sixtron
-{
+namespace sixtron {
 
 /*!
  *  \class MAX17201
