@@ -53,23 +53,6 @@ public:
         BATTERY_REMOVE              = (1 << 15)  /*!< Battery Removal */
     };
 
-    /* Represents the different alert status for the MAX17048 */
-    enum class StatusAlert : uint8_t {
-        ALERT_POR_RST            = 0x01,  /*!< Power On Reset Indicator */
-        ALERT_CURRENT_L          = 0x02,  /*!< Minimum Current Alert Threshold Exceeded */
-        BATTERY_IS_PRESENT       = 0x03,  /*!< Battery presence indicator */
-        ALERT_CURRENT_H          = 0x06,  /*!< Maximum Current Alert Threshold Exceeded */
-        ALERT_dSOCI_             = 0x07,  /*!< 1% Stage of Charge change alert */
-        ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
-        ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
-        ALERT_SOC_L              = 0x0A,  /*!< Minimum State of Charge Alert Threshold Exceeded */
-        ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
-        ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
-        ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
-        ALERT_SOC_H              = 0x0E,  /*!< Maximum State of Charge Alert Threshold Exceeded */
-        ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
-    };
-
     enum class RegisterAddress : char {
         /* ModelGauge m5 Registers */
         Status            = 0x00,
@@ -194,7 +177,6 @@ public:
      *  \param empty_voltage : voltage (V) bellow which battery is considered empty, default is 3.1V
      *  \param use_external_thermistor1 : default is false
      *  \param use_external_thermistor2 : default is false (in case both are false, will use internal thermistor)
-     *  \param enable_alert : default is false
      *  \return true on success, false on failure
      */
     bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800,
