@@ -36,7 +36,7 @@ public:
     };
 
     /* Represents the different alert flags for the MAX17048 */
-    enum class AlertFlags : uint16_t { // short ?
+    enum class AlertFlags : uint16_t {
         POWER_RESET                 = (1 << 1),  /*!< Power On Reset Indicator */
         CURRENT_MIN                 = (1 << 2),  /*!< Minimum Current Alert Threshold Exceeded */
         BATTERY_PRESENT             = (1 << 3),  /*!< Battery presence indicator */
