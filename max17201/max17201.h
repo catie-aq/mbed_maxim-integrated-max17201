@@ -19,8 +19,7 @@
 
 #include "mbed.h"
 
-namespace sixtron
-{
+namespace sixtron {
 
 /*!
  *  \class MAX17201
@@ -37,37 +36,20 @@ public:
     };
 
     /* Represents the different alert flags for the MAX17048 */
-    enum class StatusFlags : uint16_t { // short ?
-        ALERT_POR             = (1 << 1),  /*!< Power On Reset Indicator */
-        ALERT_CL              = (1 << 2),  /*!< Minimum Current Alert Threshold Exceeded */
-        BATTERY_PRESENT       = (1 << 3),  /*!< Battery presence indicator */
-        ALERT_CH              = (1 << 6),  /*!< Maximum Current Alert Threshold Exceeded */
-        ALERT_dSOCI           = (1 << 7),  /*!< 1% State of Charge change alert */
-        ALERT_VL              = (1 << 8),  /*!< Minimum Voltage Alert Threshold Exceeded */
-        ALERT_TL              = (1 << 9),  /*!< Minimum Temperature Alert Threshold Exceeded */
-        ALERT_SL              = (1 << 10), /*!< Minimum State of Charge Alert Threshold Exceeded */
-        ALERT_BI              = (1 << 11), /*!< Battery Insertion */
-        ALERT_VH              = (1 << 12), /*!< Maximum Voltage Alert Threshold Exceeded */
-        ALERT_TH              = (1 << 13), /*!< Maximum Temperature Alert Threshold Exceeded */
-        ALERT_SH              = (1 << 14), /*!< Maximum State of Charge Alert Threshold Exceeded */
-        ALERT_BR              = (1 << 15)  /*!< Battery Removal */
-    };
-
-    /* Represents the different alert status for the MAX17048 */
-    enum class StatusAlert : uint8_t {
-        ALERT_POR_RST            = 0x01,  /*!< Power On Reset Indicator */
-        ALERT_CURRENT_L          = 0x02,  /*!< Minimum Current Alert Threshold Exceeded */
-        BATTERY_IS_PRESENT       = 0x03,  /*!< Battery presence indicator */
-        ALERT_CURRENT_H          = 0x06,  /*!< Maximum Current Alert Threshold Exceeded */
-        ALERT_dSOCI_             = 0x07,  /*!< 1% Stage of Charge change alert */
-        ALERT_VOLTAGE_L          = 0x08,  /*!< Minimum Voltage Alert Threshold Exceeded */
-        ALERT_TEMP_L             = 0x09,  /*!< Minimum Temperature Alert Threshold Exceeded */
-        ALERT_SOC_L              = 0x0A,  /*!< Minimum State of Charge Alert Threshold Exceeded */
-        ALERT_BATTERY_INSERT     = 0x0B,  /*!< Battery Insertion */
-        ALERT_VOLTAGE_H          = 0x0C,  /*!< Maximum Voltage Alert Threshold Exceeded */
-        ALERT_TEMP_H             = 0x0D,  /*!< Maximum Temperature Alert Threshold Exceeded */
-        ALERT_SOC_H              = 0x0E,  /*!< Maximum State of Charge Alert Threshold Exceeded */
-        ALERT_BATTERY_REMOVE     = 0x0F   /*!< Battery Removal */
+    enum class AlertFlags : uint16_t {
+        POWER_RESET                 = (1 << 1),  /*!< Power On Reset Indicator */
+        CURRENT_MIN                 = (1 << 2),  /*!< Minimum Current Alert Threshold Exceeded */
+        BATTERY_PRESENT             = (1 << 3),  /*!< Battery presence indicator */
+        CURRENT_MAX                 = (1 << 6),  /*!< Maximum Current Alert Threshold Exceeded */
+        STATE_OF_CHARGE_CHANGE      = (1 << 7),  /*!< 1% State of Charge change alert */
+        VOLTAGE_MIN                 = (1 << 8),  /*!< Minimum Voltage Alert Threshold Exceeded */
+        TEMPERATURE_MIN             = (1 << 9),  /*!< Minimum Temperature Alert Threshold Exceeded */
+        STATE_OF_CHARGE_MIN         = (1 << 10), /*!< Minimum State of Charge Alert Threshold Exceeded */
+        BATTERY_INSERT              = (1 << 11), /*!< Battery Insertion */
+        VOLTAGE_MAX                 = (1 << 12), /*!< Maximum Voltage Alert Threshold Exceeded */
+        TEMPERATURE_MAX             = (1 << 13), /*!< Maximum Temperature Alert Threshold Exceeded */
+        STATE_OF_CHARGE_MAX         = (1 << 14), /*!< Maximum State of Charge Alert Threshold Exceeded */
+        BATTERY_REMOVE              = (1 << 15)  /*!< Battery Removal */
     };
 
     enum class RegisterAddress : char {
@@ -194,7 +176,6 @@ public:
      *  \param empty_voltage : voltage (V) bellow which battery is considered empty, default is 3.1V
      *  \param use_external_thermistor1 : default is false
      *  \param use_external_thermistor2 : default is false (in case both are false, will use internal thermistor)
-     *  \param enable_alert : default is false
      *  \return true on success, false on failure
      */
     bool configure(uint8_t number_of_cells = 1, uint16_t design_capacity = 800,

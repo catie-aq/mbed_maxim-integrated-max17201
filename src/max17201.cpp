@@ -17,11 +17,9 @@
 
 #include "max17201.h"
 
-namespace sixtron
-{
+namespace sixtron {
 
-namespace
-{
+namespace {
 #define TO_PERCENTAGE     (1./256)
 #define TO_CAPACITY       (0.005/R_SENSE)          // mAh
 #define TO_VOLTAGE        0.078125                 // mV
