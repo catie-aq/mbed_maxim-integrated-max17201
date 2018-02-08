@@ -20,6 +20,7 @@
 namespace sixtron {
 
 namespace {
+#define R_SENSE           MBED_CONF_MAX17201_SENSE_RESISTOR
 #define TO_PERCENTAGE     (1./256)
 #define TO_CAPACITY       (0.005/R_SENSE)          // mAh
 #define TO_VOLTAGE        0.078125                 // mV
