@@ -1,10 +1,9 @@
 {
-    "name": "max17201_lib",
+    "name": "max17201",
     "config": {
-        "max17201_r_sense_value": {
-            "help": "set sense resistor value : 0.005 / 0.010 / 0.020",
-            "macro_name": "R_SENSE",
-            "value": 0.020
+        "sense_resistor": {
+            "help": "Sense resistor value (in ohms)",
+            "value": "0.020"
         }
     }
 }
