@@ -21,6 +21,20 @@
 
 namespace sixtron {
 
+    struct learning_parameters{
+        uint16_t cycles;
+        uint16_t fullcapnom;
+        uint16_t timerh;
+        uint16_t nqrtable00;
+        uint16_t nqrtable10;
+        uint16_t nqrtable20;
+        uint16_t nqrtable30;
+        uint16_t niavgempty;
+        uint16_t rcomp0;
+        uint16_t tempco;
+        uint16_t fullcaprep;
+    };
+
 /*!
  *  \class MAX17201
  *  MAX17201 gauge driver
@@ -431,6 +445,20 @@ public:
      * \param func A pointer to a void function, or 0 to set as none
      */
     void alert_callback(Callback<void()> func);
+
+    /*!
+     *  Set learning parameters
+     *
+     *  \param learning parameters
+     */
+    void set_learning(learning_parameters* l_parameters);
+
+    /*!
+     *  Get learning parameters
+     *
+     *  \param learning parameters
+     */
+    void get_learning(learning_parameters* l_parameters);
 
 private:
 

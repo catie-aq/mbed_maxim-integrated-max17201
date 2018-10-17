@@ -714,6 +714,36 @@ void MAX17201::alert_callback(Callback<void()> func)
     }
 }
 
+void MAX17201::set_learning(learning_parameters* l_parameter)
+{
+    i2c_set_register(RegisterAddress::FullCapNom,l_parameter->fullcapnom);
+    i2c_set_register(RegisterAddress::Cycles,l_parameter->cycles);
+    i2c_set_register(RegisterAddress::TimerH,l_parameter->timerh);
+    i2c_set_register(RegisterAddress::QRTable00,l_parameter->nqrtable00);
+    i2c_set_register(RegisterAddress::QRTable10,l_parameter->nqrtable10);
+    i2c_set_register(RegisterAddress::QRTable20,l_parameter->nqrtable20);
+    i2c_set_register(RegisterAddress::QRTable30,l_parameter->nqrtable30);
+    i2c_set_register(RegisterAddress::IAvgEmpty,l_parameter->niavgempty);
+    i2c_set_register(RegisterAddress::RComp0,l_parameter->rcomp0);
+    i2c_set_register(RegisterAddress::TempCo,l_parameter->tempco);
+    i2c_set_register(RegisterAddress::FullCapRep,l_parameter->fullcaprep);
+}
+
+void MAX17201::get_learning(learning_parameters* l_parameter)
+{
+    i2c_read_register(RegisterAddress::FullCapNom,&l_parameter->fullcapnom);
+    i2c_read_register(RegisterAddress::Cycles,&l_parameter->cycles);
+    i2c_read_register(RegisterAddress::TimerH,&l_parameter->timerh);
+    i2c_read_register(RegisterAddress::QRTable00,&l_parameter->nqrtable00);
+    i2c_read_register(RegisterAddress::QRTable10,&l_parameter->nqrtable10);
+    i2c_read_register(RegisterAddress::QRTable20,&l_parameter->nqrtable20);
+    i2c_read_register(RegisterAddress::QRTable30,&l_parameter->nqrtable30);
+    i2c_read_register(RegisterAddress::IAvgEmpty,&l_parameter->niavgempty);
+    i2c_read_register(RegisterAddress::RComp0,&l_parameter->rcomp0);
+    i2c_read_register(RegisterAddress::TempCo,&l_parameter->tempco);
+    i2c_read_register(RegisterAddress::FullCapRep,&l_parameter->fullcaprep);
+}
+
 int MAX17201::i2c_set_register(RegisterAddress address, uint16_t value)
 {
     static char data[3];
