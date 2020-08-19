@@ -34,7 +34,7 @@ MAX17201::MAX17201(I2C *i2c, PinName interruptPin):
     _i2cAddress(I2CAddress::ModelGaugeM5Address), _interruptPin(interruptPin)
 {
     _i2c = i2c;
-    _interruptPin.mode(OpenDrain);
+    _interruptPin.mode(PullNone);
 }
 
 MAX17201::MAX17201(I2C *i2c):
