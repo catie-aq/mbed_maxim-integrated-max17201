@@ -120,10 +120,10 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
             (1 << 3)   |
             (0 << 2)   |
             (0 << 1)   |
-            (1 << 0); // bit 0 to 6 defines de number of cycles between each backup operations \
-    limited to 202 backups \
-    1 LSB = 0.5 cycles \
-            We configure to perform backup every 5 cycles
+            (1 << 0); /* bit 0 to 6 defines the number of cycles between each backup operations
+                         limited to 202 backups
+                         1 LSB = 0.5 cycles
+                         Configured to perform backup every 5 cycles */
 
             i2c_set_register(RegisterAddress::nNVCfg2, config); // nNVCfg2
 
