@@ -120,10 +120,10 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
             (1 << 3)   |
             (0 << 2)   |
             (0 << 1)   |
-            (1 << 0); // bit 0 to 6 defines de number of cycles between each backup operations \
-    limited to 202 backups \
-    1 LSB = 0.5 cycles \
-            We configure to perform backup every 5 cycles
+            (1 << 0); /* bit 0 to 6 defines the number of cycles between each backup operations
+                         limited to 202 backups
+                         1 LSB = 0.5 cycles
+                         Configured to perform backup every 5 cycles */
 
             i2c_set_register(RegisterAddress::nNVCfg2, config); // nNVCfg2
 
@@ -212,7 +212,7 @@ bool MAX17201::configure(uint8_t number_of_cells, uint16_t design_capacity, floa
 
     i2c_set_register(RegisterAddress::PackCfg, config); // PackCfg
 
-    ThisThread::sleep_for(100); // let time to software to compute new values
+    ThisThread::sleep_for(100ms); // let time to software to compute new values
 
     return true;
 }
@@ -648,7 +648,7 @@ void MAX17201::restart_firmware()
             printf("i2c error\n");
         }
         reg = reg & restart_cmd;
-        ThisThread::sleep_for(5);
+        ThisThread::sleep_for(5ms);
     } while (reg == restart_cmd);
 }
 
@@ -660,14 +660,14 @@ void MAX17201::reset()
 
     uint16_t reset_cmd = 0x00F;
     i2c_set_register(RegisterAddress::CmdRegister, reset_cmd); // Hardware power on reset
-    ThisThread::sleep_for(10);
+    ThisThread::sleep_for(10ms);
 }
 
 uint8_t MAX17201::remaining_writes()
 {
     uint16_t command = 0xE2FA; // Ask for remainings update
     i2c_set_register(RegisterAddress::CmdRegister, command);
-    ThisThread::sleep_for(5); // tRECALL
+    ThisThread::sleep_for(5ms); // tRECALL
 
     _i2cAddress = I2CAddress::ShadowRAMaddress;
     uint16_t data = 0;
@@ -680,7 +680,7 @@ uint8_t MAX17201::remaining_writes()
     int i = 0;
     int mask = 0x01;
     for (i = 0; i < 7; i++) {
-        if (mask ^ remaining_writes == 0) {
+        if ((mask ^ remaining_writes) == 0) {
             break;
         } else {
             mask = (mask << 1) + 1;
